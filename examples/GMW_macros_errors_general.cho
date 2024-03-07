@@ -1,0 +1,97 @@
+-- reusing randomness (DONE)
+   -- select random subset of flips by honest party
+   -- replace them with a constant (or a single flip?)
+-- sending to the wrong party (DONE/issue)
+   -- select a random subset of sends to honest parties
+   -- add identical sends, but to the corrupt party
+-- sending the wrong thing (e.g. secret input instead of shares) (DONE)
+   -- select a random location in the program
+   -- add a send of a random honest secret to a corrupt party
+
+--------------------------------------------------
+-- Macros for introducing errors
+--------------------------------------------------
+
+-- flip macro for incorrect/reused randomness
+MACRO flip(P1()) AS
+  f = FLIP @P1
+ENDMACRO
+
+MACRO flip_error(P1()) AS
+  f = 0
+ENDMACRO
+
+-- sending macro for sending to the wrong party
+MACRO send_wrong(P1(x), P2()) AS
+  -- do nothing (no error)
+ENDMACRO
+
+MACRO send_wrong_error(P1(x), P2()) AS
+  SEND x TO P2
+ENDMACRO
+
+-- sending a secret by accident
+MACRO send_secret(P1(x), P2()) AS
+  -- do nothing (no error)
+ENDMACRO
+
+MACRO send_secret_error(P1(x), P2()) AS
+  SEND x TO P2
+ENDMACRO
+
+--------------------------------------------------
+
+MACRO secret_share(Q1(x, f), Q2()) AS
+  -- s1 = FLIP @Q1
+  s1 = f
+  s2 = x + s1
+  SEND s2 TO Q2
+  -- DO send_wrong(Q1(s2), Q2()) GET() (can't call macros from macros)
+ENDMACRO
+
+MACRO and_gmw(P1(x1, y1, f), P2(x2, y2)) AS
+  -- out1 = FLIP @P1
+  out1 = f
+  g1_s2_00 = out1 + ((x1 + 0) ^ (y1 + 0))
+  g1_s2_01 = out1 + ((x1 + 0) ^ (y1 + 1))
+  g1_s2_10 = out1 + ((x1 + 1) ^ (y1 + 0))
+  g1_s2_11 = out1 + ((x1 + 1) ^ (y1 + 1))
+  out2 = OBLIVIOUSLY [[g1_s2_00, g1_s2_01]?y2, [g1_s2_10, g1_s2_11]?y2]?x2 FOR P2
+ENDMACRO
+
+MACRO reveal(P1(x1), P2(x2)) AS
+  SEND x1 TO P2
+  SEND x2 TO P1
+  y = x1 + x2
+  OUTPUT y
+ENDMACRO
+
+-- Read Secrets
+c_in = SECRET @P1
+h1_in = SECRET @P2
+h2_in = SECRET @P2
+
+-- Set up shares
+DO flip(P1()) GET(f1=f)
+DO secret_share(P1(c_in, f1), P2()) GET(c_s1=s1, c_s2=s2)
+DO send_secret(P1(c_in), P2()) GET()
+
+DO flip(P2()) GET(f2=f)
+DO secret_share(P2(h1_in, f2), P1()) GET(h1_s1=s2, h1_s2=s1)
+DO send_secret(P2(h1_in), P1()) GET()
+
+DO flip(P2()) GET(f3=f)
+DO secret_share(P2(h2_in, f3), P1()) GET(h2_s1=s2, h2_s2=s1)
+DO send_secret(P2(h2_in), P1()) GET()
+
+-- First AND gate: c_in * h1_in
+-- P1 sets up, P2 chooses.
+DO flip(P1()) GET(f4=f)
+DO and_gmw(P1(c_s1, h1_s1, f4), P2(c_s2, h1_s2)) GET(g1=out1, g2=out2)
+
+-- Second AND gate: g * h2_in
+DO flip(P1()) GET(f5=f)
+DO and_gmw(P1(g1, h2_s1, f5), P2(g2, h2_s2)) GET(o1=out1, o2=out2)
+
+-- Reveal
+DO reveal(P1(o1), P2(o2)) GET()

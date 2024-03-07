@@ -1,0 +1,56 @@
+-- To run with secret values:
+-- cabal run haskell-semantics examples/2partyBeaver.cho 1 1 1 0 0 0
+
+-- Triple #1
+c_t1_a = SECRET @C --1 -- a = 0
+h_t1_a = SECRET @H --1
+c_t1_b = SECRET @C --1 -- b = 1
+h_t1_b = SECRET @H --0
+c_t1_c = SECRET @C --0 -- c = 0
+h_t1_c = SECRET @H --0
+
+-- Read Secrets
+c_in = SECRET @C
+h_in = SECRET @H
+
+-- Set up shares
+c_s1 = FLIP @C
+c_s2 = c_s1 + c_in
+h_s1 = FLIP @H
+h_s2 = h_s1 XOR h_in
+
+-- Round one messages
+SEND c_s1 TO H
+SEND h_s2 TO C
+
+-- c_in is alpha
+-- h_in is beta
+-- H's share of d and e
+d_h = c_s1 + h_t1_a
+e_h = h_s1 + h_t1_b
+SEND d_h TO C
+SEND e_h TO C
+
+-- C's share of d and e
+d_c = c_s2 + c_t1_a
+e_c = h_s2 + c_t1_b
+SEND d_c TO H
+SEND e_c TO H
+
+-- recover d and e
+d = d_h + d_c -- on both parties
+e = e_h + e_c
+
+-- build shares of c_in * h_in
+prod_h = (d ^ e) + (d ^ h_t1_b) + (e ^ h_t1_a) + h_t1_c
+prod_c = (d ^ e) + (d ^ c_t1_b) + (e ^ c_t1_a) + c_t1_c
+
+-- Reveal product
+SEND prod_h TO C
+SEND prod_c TO H
+y = prod_h + prod_c
+
+-- Write to output
+OUTPUT y
+
+

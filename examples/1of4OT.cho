@@ -1,0 +1,47 @@
+-- https://crypto.stanford.edu/pbc/notes/crypto/ot.html#_1_out_of_n_from_1_out_of_2
+
+-- Operation arguments
+option_00 = SECRET @P1
+option_01 = SECRET @P1
+option_10 = SECRET @P1
+option_11 = SECRET @P1
+choice_i1 = SECRET @P2
+choice_i2 = SECRET @P2
+
+-- P1 prepares keys
+k1_0 = FLIP @P1
+k1_1 = FLIP @P1
+k2_0 = FLIP @P1
+k2_1 = FLIP @P1
+
+-- P1 prepares ciphers
+f_k10_00 = k1_0 + 0 + 0
+f_k20_00 = k2_0 + 0 + 0
+c00 = option_00 + (f_k10_00 + f_k20_00)
+f_k10_01 = k1_0 + 0 + 1
+f_k21_01 = k2_1 + 0 + 1
+c01 = option_01 + (f_k10_01 + f_k21_01)
+f_k11_10 = k1_1 + 1 + 0
+f_k20_10 = k2_0 + 1 + 0
+c10 = option_10 + (f_k11_10 + f_k20_10)
+f_k11_11 = k1_1 + 1 + 1
+f_k21_11 = k2_1 + 1 + 1
+c11 = option_11 + (f_k11_11 + f_k21_11)
+-- P1 sends cipers
+SEND c00 TO P2
+SEND c01 TO P2
+SEND c10 TO P2
+SEND c11 TO P2
+
+-- Use 1of2OT primitive
+ot1 = OBLIVIOUSLYBY choice_i1 CHOOSE k1_1 k1_0 FOR P2
+ot2 = OBLIVIOUSLYBY choice_i2 CHOOSE k2_1 k2_0 FOR P2
+
+-- Decrypt
+key = ot1 + ot2
+m00 = c00 + key + 0 + 0
+m01 = c01 + key + 0 + 1
+m10 = c10 + key + 1 + 0
+m11 = c11 + key + 1 + 1
+final = (m00 AND !choice_i1 AND !choice_i2) + (m01 AND !choice_i1 AND choice_i2) + (m10 AND choice_i1 AND !choice_i2) + (m11 AND choice_i1 AND choice_i2)
+OUTPUT final

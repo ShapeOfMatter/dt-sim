@@ -1,0 +1,20 @@
+-- Read Secrets
+c_in = SECRET @C
+h_in = SECRET @H
+
+-- Functions
+MACRO sendinverse(P1(a), P2()) AS
+  na = a XOR 1
+  SEND na TO P2
+ENDMACRO
+
+-- C acts once
+DO sendinverse(C(c_in), H()) GET (c_out = na)
+OUTPUT c_out
+
+-- H acts twice
+DO sendinverse(H(h_in), C()) GET (h_out1 = na)
+OUTPUT h_out1
+DO sendinverse(H(h_in), C()) GET (h_out2 = na)
+OUTPUT h_out2
+

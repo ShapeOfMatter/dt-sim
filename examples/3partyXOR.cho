@@ -1,0 +1,39 @@
+-- Read Secrets
+c_in = SECRET @C
+h1_in = SECRET @H1
+h2_in = SECRET @H2
+
+-- Set up shares
+c_s1 = FLIP @C
+c_s2 = FLIP @C
+c_s3 = c_s1 + c_s2 + c_in
+h1_s1 = FLIP @H1
+h1_s2 = FLIP @H1
+h1_s3 = h1_s1 XOR h1_s2 XOR h1_in
+h2_s1 = FLIP @H2
+h2_s2 = FLIP @H2
+h2_s3 = h2_s1 <> (h2_s2 <> h2_in)
+
+-- Round one messages
+SEND c_s1 TO H1
+SEND h2_s1 TO H1
+SEND c_s2 TO H2
+SEND h1_s2 TO H2
+SEND h1_s3 TO C
+SEND h2_s3 TO C
+
+-- Compute the gates
+h1_sum = c_s1 + h1_s1 + h2_s1
+h2_sum = c_s2 + h1_s2 + h2_s2
+c_sum = c_s3+h1_s3+ h2_s3
+
+-- Reveal final wire
+SEND h1_sum TO H2,C
+SEND h2_sum TO H1 , C
+SEND c_sum TO H1, H2
+y = h1_sum +h2_sum + c_sum
+
+-- Write to output
+OUTPUT y
+
+

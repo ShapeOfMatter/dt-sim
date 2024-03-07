@@ -1,0 +1,126 @@
+
+{-
+A GMW implementation of <_io.TextIOWrapper name='circuits/less_than_2.txt' mode='r' encoding='utf_8'> using beaver triples.
+Broken acording to: ImplementationDetails(bias_sharing=0, bias_and=2, accidental_secret=0, accidental_gate=0, outputs='values')
+-}
+
+
+MACRO secret_share(P1(x), P2()) AS
+  f_0 = FLIP @P1
+  
+  s1 = f_0
+  s2 = x + s1
+  SEND s2 TO P2
+ENDMACRO
+
+
+MACRO and_beaver(P1(x2, y2), P2(x1, y1)) AS
+  -- generate beaver triple
+  fa_0 = FLIP @P3
+  fa_1 = FLIP @P3
+  fa_2 = FLIP @P3
+  
+  a1 = fa_0 ^ fa_1 ^ fa_2
+  a2 = FLIP @P3
+  b1 = FLIP @P3
+  fb_0 = FLIP @P3
+  fb_1 = FLIP @P3
+  fb_2 = FLIP @P3
+  
+  b2 = fb_0 ^ fb_1 ^ fb_2
+  c1 = FLIP @P3
+
+  c2 = ((a1 + a2) ^ (b1 + b2)) + c1
+
+  -- deal shares of beaver triple
+  SEND a1 TO P1
+  SEND b1 TO P1
+  SEND c1 TO P1
+
+  SEND a2 TO P2
+  SEND b2 TO P2
+  SEND c2 TO P2
+
+  -- use beaver triple to evaluate the gate
+  d1 = x2 + a1
+  d2 = x1 + a2
+  SEND d1 TO P2
+  SEND d2 TO P1
+  d = d1 + d2
+  e1 = y2 + b1
+  e2 = y1 + b2
+  SEND e1 TO P2
+  SEND e2 TO P1
+  e = e1 + e2
+
+  out1 = (d ^ e) + (d ^ b1) + (e ^ a1) + c1
+  -- only one party does addition-w-constant.
+  out2 =           (d ^ b2) + (e ^ a2) + c2
+
+  
+  leakage = out2 ^(~( 1 ))
+  SEND leakage TO P1
+ENDMACRO
+
+
+MACRO reveal(P1(x1), P2(x2)) AS
+  SEND x1 TO P2
+  SEND x2 TO P1
+  y = x1 + x2
+ENDMACRO
+
+-- Read secrets
+x0 = SECRET @P1
+x1 = SECRET @P1
+
+y2 = SECRET @P2
+
+leak_y2 = y2 ^(~( 1 ))
+SEND leak_y2 TO P1 -- accidental send secret to corrupt
+y3 = SECRET @P2
+
+leak_y3 = y3 ^(~( 1 ))
+SEND leak_y3 TO P1 -- accidental send secret to corrupt
+
+-- Set up shares
+DO secret_share(P1(x0), P2()) GET(x0_1=s1, x0_2=s2)
+DO secret_share(P1(x1), P2()) GET(x1_1=s1, x1_2=s2)
+
+DO secret_share(P2(y2), P1()) GET(y2_1=s2, y2_2=s1)
+DO secret_share(P2(y3), P1()) GET(y3_1=s2, y3_2=s1)
+
+-- Circuit evaluation
+g3_1 = ~y2_1
+g3_2 = y2_2
+DO and_beaver(P1(x0_1, g3_1), P2(x0_2, g3_2)) GET(g4_1=out1, g4_2=out2)
+g5_1 = ~x0_1
+g5_2 = x0_2
+DO and_beaver(P1(y2_1, g5_1), P2(y2_2, g5_2)) GET(g6_1=out1, g6_2=out2)
+g7_1 = ~y3_1
+g7_2 = y3_2
+g8_1 = ~g6_1
+g8_2 = g6_2
+DO and_beaver(P1(g7_1, g8_1), P2(g7_2, g8_2)) GET(g9_1=out1, g9_2=out2)
+DO and_beaver(P1(x1_1, g9_1), P2(x1_2, g9_2)) GET(g10_1=out1, g10_2=out2)
+DO and_beaver(P1(g4_1, g10_1), P2(g4_2, g10_2)) GET(g11_1=out1, g11_2=out2)
+g12_1 = g4_1 + g10_1
+g12_2 = g4_2 + g10_2
+g13_1 = g11_1 + g12_1
+g13_2 = g11_2 + g12_2
+g14_1 = ~x1_1
+g14_2 = x1_2
+g15_1 = ~g4_1
+g15_2 = g4_2
+DO and_beaver(P1(g14_1, g15_1), P2(g14_2, g15_2)) GET(g16_1=out1, g16_2=out2)
+DO and_beaver(P1(y3_1, g16_1), P2(y3_2, g16_2)) GET(g17_1=out1, g17_2=out2)
+DO and_beaver(P1(g6_1, g17_1), P2(g6_2, g17_2)) GET(g18_1=out1, g18_2=out2)
+g19_1 = g6_1 + g17_1
+g19_2 = g6_2 + g17_2
+g20_1 = g18_1 + g19_1
+g20_2 = g18_2 + g19_2
+g21_1 = g13_1
+g21_2 = g13_2
+
+-- Reveal output?
+DO reveal(P1(g21_1), P2(g21_2)) GET(r0=y)
+OUTPUT r0

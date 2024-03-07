@@ -1,0 +1,12 @@
+circuit,protocol,iters,train_size,test_size,pval,data_time,d_tree_time,bias_sharing,bias_and,accidental_secret,accidental_gate,outputs
+less_than_3.txt,gmw,256,4096,2048,7.061864668270014e-44,19.66,5.2,0,0,0,1,values
+less_than_3.txt,gmw,256,4096,2048,9.025359418664877e-44,20.23,5.12,0,0,0,1,values
+less_than_3.txt,gmw,256,4096,2048,8.262800041124808e-44,20.35,6.53,0,0,0,1,values
+less_than_3.txt,gmw,256,4096,2048,4.845002156452281e-44,21.38,6.68,0,0,0,2,values
+less_than_3.txt,gmw,256,4096,2048,4.84554343178938e-44,21.7,5.47,0,0,0,2,values
+less_than_3.txt,gmw,256,4096,2048,4.843503549159994e-44,22.16,5.42,0,0,0,2,values
+less_than_3.txt,gmw,256,4096,2048,4.844336052712378e-44,20.58,5.18,0,1,0,0,values
+less_than_3.txt,gmw,256,4096,2048,4.844003034476161e-44,21.02,4.93,0,1,0,0,values
+less_than_3.txt,gmw,256,4096,2048,4.84233827957425e-44,20.88,5.38,0,1,0,0,values
+less_than_3.txt,gmw,256,4096,2048,4.841922178407487e-44,21.71,5.22,0,2,0,0,values
+less_than_3.txt,gmw,256,4096,2048,4.844419310774664e-44,21.44,5.05,0,2,0,0,values

@@ -1,0 +1,123 @@
+-- To run with secret values:
+-- cabal run haskell-semantics examples/3partyBeaver.cho 1 1 0 1 0 0 0 0 0 1 0 0 1 0 0 0 1 1
+
+-- Triple #1
+c_t1_a = SECRET @C --1 -- a = 0
+h1_t1_a = SECRET @H1 --1
+h2_t1_a = SECRET @H2 --0
+c_t1_b = SECRET @C --1 -- b = 1
+h1_t1_b = SECRET @H1 --0
+h2_t1_b = SECRET @H2 --0
+c_t1_c = SECRET @C --0 -- c = 0
+h1_t1_c = SECRET @H1 --0
+h2_t1_c = SECRET @H2 --0
+
+-- Triple #2
+c_t2_a = SECRET @C --1 -- a = 1
+h1_t2_a = SECRET @H1 --0
+h2_t2_a = SECRET @H2 --0
+c_t2_b = SECRET @C --1 -- b = 1
+h1_t2_b = SECRET @H1 --0
+h2_t2_b = SECRET @H2 --0
+c_t2_c = SECRET @C --0 -- c = 1
+h1_t2_c = SECRET @H1 --1
+h2_t2_c = SECRET @H2 --1
+
+-- Read Secrets
+c_in = SECRET @C
+h1_in = SECRET @H1
+h2_in = SECRET @H2
+
+-- Set up shares
+c_s1 = FLIP @C
+c_s2 = FLIP @C
+c_s3 = c_s1 + c_s2 + c_in
+h1_s1 = FLIP @H1
+h1_s2 = FLIP @H1
+h1_s3 = h1_s1 + h1_s2 + h1_in
+h2_s1 = FLIP @H2
+h2_s2 = FLIP @H2
+h2_s3 = h2_s1 + h2_s2 + h2_in
+
+-- Round one messages
+SEND c_s1 TO H1
+SEND c_s2 TO H2
+
+SEND h1_s2 TO H2
+SEND h1_s3 TO C
+
+SEND h2_s1 TO H1
+SEND h2_s3 TO C
+
+-- FIRST MULT
+-- c_in is alpha
+-- h1_in is beta
+
+-- H1's share of d and e
+d_h1 = c_s1 + h1_t1_a
+e_h1 = h1_s1 + h1_t1_b
+SEND d_h1 TO C,H2
+SEND e_h1 TO C,H2
+
+-- H2's share of d and e
+d_h2 = c_s2 + h2_t1_a
+e_h2 = h1_s2 + h2_t1_b
+SEND d_h2 TO C,H1
+SEND e_h2 TO C,H1
+
+-- C's share of d and e
+d_c = c_s3 + c_t1_a
+e_c = h1_s3 + c_t1_b
+SEND d_c TO H1,H2
+SEND e_c TO H1,H2
+
+-- recover d and e
+d = d_h1 + d_h2 + d_c -- on all parties
+e = e_h1 + e_h2 + e_c
+
+-- build shares of c_in * h1_in
+prod_h1 = (d ^ e) + (d ^ h1_t1_b) + (e ^ h1_t1_a) + h1_t1_c
+prod_h2 = (d ^ e) + (d ^ h2_t1_b) + (e ^ h2_t1_a) + h2_t1_c
+prod_c = (d ^ e) + (d ^ c_t1_b) + (e ^ c_t1_a) + c_t1_c
+
+-- SECOND MULT
+-- prod is alpha
+-- h2_in is beta
+
+-- H1's share of d and e
+d2_h1 = prod_h1 + h1_t2_a
+e2_h1 = h2_s1 + h1_t2_b
+SEND d2_h1 TO C,H2
+SEND e2_h1 TO C,H2
+
+-- H2's share of d and e
+d2_h2 = prod_h2 + h2_t2_a
+e2_h2 = h2_s2 + h2_t2_b
+SEND d2_h2 TO C,H1
+SEND e2_h2 TO C,H1
+
+-- C's share of d and e
+d2_c = prod_c + c_t2_a
+e2_c = h2_s3 + c_t2_b
+SEND d2_c TO H1,H2
+SEND e2_c TO H1,H2
+
+-- recover d and e
+d2 = d2_h1 + d2_h2 + d2_c -- on all parties
+e2 = e2_h1 + e2_h2 + e2_c
+
+-- build shares of c_in * h1_in
+final_h1 = (d2 ^ e2) + (d2 ^ h1_t2_b) + (e2 ^ h1_t2_a) + h1_t2_c
+final_h2 = (d2 ^ e2) + (d2 ^ h2_t2_b) + (e2 ^ h2_t2_a) + h2_t2_c
+final_c = (d2 ^ e2) + (d2 ^ c_t2_b) + (e2 ^ c_t2_a) + c_t2_c
+
+-- Reveal product
+SEND final_h1 TO C,H2
+SEND final_h2 TO C,H1
+SEND final_c TO H1,H2
+y = final_h1 + final_h2 + final_c
+
+-- Write to output
+OUTPUT y
+
+

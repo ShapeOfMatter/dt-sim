@@ -1,0 +1,14 @@
+.venv
+dist-newstyle
+.temp.py
+gitignore
+.ipynb_checkpoints
+cores
+__pycache__
+.~*
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out
+paper/*.pdf

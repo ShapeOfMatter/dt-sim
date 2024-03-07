@@ -1,0 +1,567 @@
+
+MACRO secret_share(P1(x), P2()) AS
+  s1 = FLIP @P1
+  s2 = x + s1
+  SEND s1 TO P2
+ENDMACRO
+
+MACRO and_gmw(P1(x1, y1), P2(x2, y2)) AS
+  out1 = FLIP @P1
+  g1_s2_00 = out1 + ((x1 + 0) ^ (y1 + 0))
+  g1_s2_01 = out1 + ((x1 + 0) ^ (y1 + 1))
+  g1_s2_10 = out1 + ((x1 + 1) ^ (y1 + 0))
+  g1_s2_11 = out1 + ((x1 + 1) ^ (y1 + 1))
+  out2 = OBLIVIOUSLY [[g1_s2_00, g1_s2_01]?y2, [g1_s2_10, g1_s2_11]?y2]?x2 FOR P2
+ENDMACRO
+
+MACRO reveal(P1(x1), P2(x2)) AS
+  SEND x1 TO P2
+  SEND x2 TO P1
+  y = x1 + x2
+ENDMACRO
+
+-- Read secrets
+x0 = SECRET @P1
+x1 = SECRET @P1
+x2 = SECRET @P1
+x3 = SECRET @P1
+x4 = SECRET @P1
+x5 = SECRET @P1
+x6 = SECRET @P1
+x7 = SECRET @P1
+x8 = SECRET @P1
+x9 = SECRET @P1
+x10 = SECRET @P1
+x11 = SECRET @P1
+x12 = SECRET @P1
+x13 = SECRET @P1
+x14 = SECRET @P1
+x15 = SECRET @P1
+x16 = SECRET @P1
+x17 = SECRET @P1
+x18 = SECRET @P1
+x19 = SECRET @P1
+x20 = SECRET @P1
+x21 = SECRET @P1
+x22 = SECRET @P1
+x23 = SECRET @P1
+x24 = SECRET @P1
+x25 = SECRET @P1
+x26 = SECRET @P1
+x27 = SECRET @P1
+x28 = SECRET @P1
+x29 = SECRET @P1
+x30 = SECRET @P1
+x31 = SECRET @P1
+
+y0 = SECRET @P2
+y1 = SECRET @P2
+y2 = SECRET @P2
+y3 = SECRET @P2
+y4 = SECRET @P2
+y5 = SECRET @P2
+y6 = SECRET @P2
+y7 = SECRET @P2
+y8 = SECRET @P2
+y9 = SECRET @P2
+y10 = SECRET @P2
+y11 = SECRET @P2
+y12 = SECRET @P2
+y13 = SECRET @P2
+y14 = SECRET @P2
+y15 = SECRET @P2
+y16 = SECRET @P2
+y17 = SECRET @P2
+y18 = SECRET @P2
+y19 = SECRET @P2
+y20 = SECRET @P2
+y21 = SECRET @P2
+y22 = SECRET @P2
+y23 = SECRET @P2
+y24 = SECRET @P2
+y25 = SECRET @P2
+y26 = SECRET @P2
+y27 = SECRET @P2
+y28 = SECRET @P2
+y29 = SECRET @P2
+y30 = SECRET @P2
+y31 = SECRET @P2
+
+-- Set up shares
+DO secret_share(P1(x0), P2()) GET(x0_1=s2, x0_2=s1)
+DO secret_share(P1(x1), P2()) GET(x1_1=s2, x1_2=s1)
+DO secret_share(P1(x2), P2()) GET(x2_1=s2, x2_2=s1)
+DO secret_share(P1(x3), P2()) GET(x3_1=s2, x3_2=s1)
+DO secret_share(P1(x4), P2()) GET(x4_1=s2, x4_2=s1)
+DO secret_share(P1(x5), P2()) GET(x5_1=s2, x5_2=s1)
+DO secret_share(P1(x6), P2()) GET(x6_1=s2, x6_2=s1)
+DO secret_share(P1(x7), P2()) GET(x7_1=s2, x7_2=s1)
+DO secret_share(P1(x8), P2()) GET(x8_1=s2, x8_2=s1)
+DO secret_share(P1(x9), P2()) GET(x9_1=s2, x9_2=s1)
+DO secret_share(P1(x10), P2()) GET(x10_1=s2, x10_2=s1)
+DO secret_share(P1(x11), P2()) GET(x11_1=s2, x11_2=s1)
+DO secret_share(P1(x12), P2()) GET(x12_1=s2, x12_2=s1)
+DO secret_share(P1(x13), P2()) GET(x13_1=s2, x13_2=s1)
+DO secret_share(P1(x14), P2()) GET(x14_1=s2, x14_2=s1)
+DO secret_share(P1(x15), P2()) GET(x15_1=s2, x15_2=s1)
+DO secret_share(P1(x16), P2()) GET(x16_1=s2, x16_2=s1)
+DO secret_share(P1(x17), P2()) GET(x17_1=s2, x17_2=s1)
+DO secret_share(P1(x18), P2()) GET(x18_1=s2, x18_2=s1)
+DO secret_share(P1(x19), P2()) GET(x19_1=s2, x19_2=s1)
+DO secret_share(P1(x20), P2()) GET(x20_1=s2, x20_2=s1)
+DO secret_share(P1(x21), P2()) GET(x21_1=s2, x21_2=s1)
+DO secret_share(P1(x22), P2()) GET(x22_1=s2, x22_2=s1)
+DO secret_share(P1(x23), P2()) GET(x23_1=s2, x23_2=s1)
+DO secret_share(P1(x24), P2()) GET(x24_1=s2, x24_2=s1)
+DO secret_share(P1(x25), P2()) GET(x25_1=s2, x25_2=s1)
+DO secret_share(P1(x26), P2()) GET(x26_1=s2, x26_2=s1)
+DO secret_share(P1(x27), P2()) GET(x27_1=s2, x27_2=s1)
+DO secret_share(P1(x28), P2()) GET(x28_1=s2, x28_2=s1)
+DO secret_share(P1(x29), P2()) GET(x29_1=s2, x29_2=s1)
+DO secret_share(P1(x30), P2()) GET(x30_1=s2, x30_2=s1)
+DO secret_share(P1(x31), P2()) GET(x31_1=s2, x31_2=s1)
+
+DO secret_share(P2(y0), P1()) GET(y0_1=s1, y0_2=s2)
+DO secret_share(P2(y1), P1()) GET(y1_1=s1, y1_2=s2)
+DO secret_share(P2(y2), P1()) GET(y2_1=s1, y2_2=s2)
+DO secret_share(P2(y3), P1()) GET(y3_1=s1, y3_2=s2)
+DO secret_share(P2(y4), P1()) GET(y4_1=s1, y4_2=s2)
+DO secret_share(P2(y5), P1()) GET(y5_1=s1, y5_2=s2)
+DO secret_share(P2(y6), P1()) GET(y6_1=s1, y6_2=s2)
+DO secret_share(P2(y7), P1()) GET(y7_1=s1, y7_2=s2)
+DO secret_share(P2(y8), P1()) GET(y8_1=s1, y8_2=s2)
+DO secret_share(P2(y9), P1()) GET(y9_1=s1, y9_2=s2)
+DO secret_share(P2(y10), P1()) GET(y10_1=s1, y10_2=s2)
+DO secret_share(P2(y11), P1()) GET(y11_1=s1, y11_2=s2)
+DO secret_share(P2(y12), P1()) GET(y12_1=s1, y12_2=s2)
+DO secret_share(P2(y13), P1()) GET(y13_1=s1, y13_2=s2)
+DO secret_share(P2(y14), P1()) GET(y14_1=s1, y14_2=s2)
+DO secret_share(P2(y15), P1()) GET(y15_1=s1, y15_2=s2)
+DO secret_share(P2(y16), P1()) GET(y16_1=s1, y16_2=s2)
+DO secret_share(P2(y17), P1()) GET(y17_1=s1, y17_2=s2)
+DO secret_share(P2(y18), P1()) GET(y18_1=s1, y18_2=s2)
+DO secret_share(P2(y19), P1()) GET(y19_1=s1, y19_2=s2)
+DO secret_share(P2(y20), P1()) GET(y20_1=s1, y20_2=s2)
+DO secret_share(P2(y21), P1()) GET(y21_1=s1, y21_2=s2)
+DO secret_share(P2(y22), P1()) GET(y22_1=s1, y22_2=s2)
+DO secret_share(P2(y23), P1()) GET(y23_1=s1, y23_2=s2)
+DO secret_share(P2(y24), P1()) GET(y24_1=s1, y24_2=s2)
+DO secret_share(P2(y25), P1()) GET(y25_1=s1, y25_2=s2)
+DO secret_share(P2(y26), P1()) GET(y26_1=s1, y26_2=s2)
+DO secret_share(P2(y27), P1()) GET(y27_1=s1, y27_2=s2)
+DO secret_share(P2(y28), P1()) GET(y28_1=s1, y28_2=s2)
+DO secret_share(P2(y29), P1()) GET(y29_1=s1, y29_2=s2)
+DO secret_share(P2(y30), P1()) GET(y30_1=s1, y30_2=s2)
+DO secret_share(P2(y31), P1()) GET(y31_1=s1, y31_2=s2)
+
+-- Adder circuit
+g1_1 = x31_1 + y31_1
+g1_2 = x31_2 + y31_2
+DO and_gmw(P1(x31_1, y31_1), P2(x31_2, y31_2)) GET(g2_1=out1, g2_2=out2)
+g3_1 = x30_1 + y30_1
+g3_2 = x30_2 + y30_2
+g4_1 = g3_1 + g2_1
+g4_2 = g3_2 + g2_2
+g5_1 = x30_1 + g2_1
+g5_2 = x30_2 + g2_2
+g6_1 = y30_1 + g2_1
+g6_2 = y30_2 + g2_2
+DO and_gmw(P1(g5_1, g6_1), P2(g5_2, g6_2)) GET(g7_1=out1, g7_2=out2)
+g8_1 = g7_1 + g2_1
+g8_2 = g7_2 + g2_2
+g9_1 = x29_1 + y29_1
+g9_2 = x29_2 + y29_2
+g10_1 = g9_1 + g8_1
+g10_2 = g9_2 + g8_2
+g11_1 = x29_1 + g8_1
+g11_2 = x29_2 + g8_2
+g12_1 = y29_1 + g8_1
+g12_2 = y29_2 + g8_2
+DO and_gmw(P1(g11_1, g12_1), P2(g11_2, g12_2)) GET(g13_1=out1, g13_2=out2)
+g14_1 = g13_1 + g8_1
+g14_2 = g13_2 + g8_2
+g15_1 = x28_1 + y28_1
+g15_2 = x28_2 + y28_2
+g16_1 = g15_1 + g14_1
+g16_2 = g15_2 + g14_2
+g17_1 = x28_1 + g14_1
+g17_2 = x28_2 + g14_2
+g18_1 = y28_1 + g14_1
+g18_2 = y28_2 + g14_2
+DO and_gmw(P1(g17_1, g18_1), P2(g17_2, g18_2)) GET(g19_1=out1, g19_2=out2)
+g20_1 = g19_1 + g14_1
+g20_2 = g19_2 + g14_2
+g21_1 = x27_1 + y27_1
+g21_2 = x27_2 + y27_2
+g22_1 = g21_1 + g20_1
+g22_2 = g21_2 + g20_2
+g23_1 = x27_1 + g20_1
+g23_2 = x27_2 + g20_2
+g24_1 = y27_1 + g20_1
+g24_2 = y27_2 + g20_2
+DO and_gmw(P1(g23_1, g24_1), P2(g23_2, g24_2)) GET(g25_1=out1, g25_2=out2)
+g26_1 = g25_1 + g20_1
+g26_2 = g25_2 + g20_2
+g27_1 = x26_1 + y26_1
+g27_2 = x26_2 + y26_2
+g28_1 = g27_1 + g26_1
+g28_2 = g27_2 + g26_2
+g29_1 = x26_1 + g26_1
+g29_2 = x26_2 + g26_2
+g30_1 = y26_1 + g26_1
+g30_2 = y26_2 + g26_2
+DO and_gmw(P1(g29_1, g30_1), P2(g29_2, g30_2)) GET(g31_1=out1, g31_2=out2)
+g32_1 = g31_1 + g26_1
+g32_2 = g31_2 + g26_2
+g33_1 = x25_1 + y25_1
+g33_2 = x25_2 + y25_2
+g34_1 = g33_1 + g32_1
+g34_2 = g33_2 + g32_2
+g35_1 = x25_1 + g32_1
+g35_2 = x25_2 + g32_2
+g36_1 = y25_1 + g32_1
+g36_2 = y25_2 + g32_2
+DO and_gmw(P1(g35_1, g36_1), P2(g35_2, g36_2)) GET(g37_1=out1, g37_2=out2)
+g38_1 = g37_1 + g32_1
+g38_2 = g37_2 + g32_2
+g39_1 = x24_1 + y24_1
+g39_2 = x24_2 + y24_2
+g40_1 = g39_1 + g38_1
+g40_2 = g39_2 + g38_2
+g41_1 = x24_1 + g38_1
+g41_2 = x24_2 + g38_2
+g42_1 = y24_1 + g38_1
+g42_2 = y24_2 + g38_2
+DO and_gmw(P1(g41_1, g42_1), P2(g41_2, g42_2)) GET(g43_1=out1, g43_2=out2)
+g44_1 = g43_1 + g38_1
+g44_2 = g43_2 + g38_2
+g45_1 = x23_1 + y23_1
+g45_2 = x23_2 + y23_2
+g46_1 = g45_1 + g44_1
+g46_2 = g45_2 + g44_2
+g47_1 = x23_1 + g44_1
+g47_2 = x23_2 + g44_2
+g48_1 = y23_1 + g44_1
+g48_2 = y23_2 + g44_2
+DO and_gmw(P1(g47_1, g48_1), P2(g47_2, g48_2)) GET(g49_1=out1, g49_2=out2)
+g50_1 = g49_1 + g44_1
+g50_2 = g49_2 + g44_2
+g51_1 = x22_1 + y22_1
+g51_2 = x22_2 + y22_2
+g52_1 = g51_1 + g50_1
+g52_2 = g51_2 + g50_2
+g53_1 = x22_1 + g50_1
+g53_2 = x22_2 + g50_2
+g54_1 = y22_1 + g50_1
+g54_2 = y22_2 + g50_2
+DO and_gmw(P1(g53_1, g54_1), P2(g53_2, g54_2)) GET(g55_1=out1, g55_2=out2)
+g56_1 = g55_1 + g50_1
+g56_2 = g55_2 + g50_2
+g57_1 = x21_1 + y21_1
+g57_2 = x21_2 + y21_2
+g58_1 = g57_1 + g56_1
+g58_2 = g57_2 + g56_2
+g59_1 = x21_1 + g56_1
+g59_2 = x21_2 + g56_2
+g60_1 = y21_1 + g56_1
+g60_2 = y21_2 + g56_2
+DO and_gmw(P1(g59_1, g60_1), P2(g59_2, g60_2)) GET(g61_1=out1, g61_2=out2)
+g62_1 = g61_1 + g56_1
+g62_2 = g61_2 + g56_2
+g63_1 = x20_1 + y20_1
+g63_2 = x20_2 + y20_2
+g64_1 = g63_1 + g62_1
+g64_2 = g63_2 + g62_2
+g65_1 = x20_1 + g62_1
+g65_2 = x20_2 + g62_2
+g66_1 = y20_1 + g62_1
+g66_2 = y20_2 + g62_2
+DO and_gmw(P1(g65_1, g66_1), P2(g65_2, g66_2)) GET(g67_1=out1, g67_2=out2)
+g68_1 = g67_1 + g62_1
+g68_2 = g67_2 + g62_2
+g69_1 = x19_1 + y19_1
+g69_2 = x19_2 + y19_2
+g70_1 = g69_1 + g68_1
+g70_2 = g69_2 + g68_2
+g71_1 = x19_1 + g68_1
+g71_2 = x19_2 + g68_2
+g72_1 = y19_1 + g68_1
+g72_2 = y19_2 + g68_2
+DO and_gmw(P1(g71_1, g72_1), P2(g71_2, g72_2)) GET(g73_1=out1, g73_2=out2)
+g74_1 = g73_1 + g68_1
+g74_2 = g73_2 + g68_2
+g75_1 = x18_1 + y18_1
+g75_2 = x18_2 + y18_2
+g76_1 = g75_1 + g74_1
+g76_2 = g75_2 + g74_2
+g77_1 = x18_1 + g74_1
+g77_2 = x18_2 + g74_2
+g78_1 = y18_1 + g74_1
+g78_2 = y18_2 + g74_2
+DO and_gmw(P1(g77_1, g78_1), P2(g77_2, g78_2)) GET(g79_1=out1, g79_2=out2)
+g80_1 = g79_1 + g74_1
+g80_2 = g79_2 + g74_2
+g81_1 = x17_1 + y17_1
+g81_2 = x17_2 + y17_2
+g82_1 = g81_1 + g80_1
+g82_2 = g81_2 + g80_2
+g83_1 = x17_1 + g80_1
+g83_2 = x17_2 + g80_2
+g84_1 = y17_1 + g80_1
+g84_2 = y17_2 + g80_2
+DO and_gmw(P1(g83_1, g84_1), P2(g83_2, g84_2)) GET(g85_1=out1, g85_2=out2)
+g86_1 = g85_1 + g80_1
+g86_2 = g85_2 + g80_2
+g87_1 = x16_1 + y16_1
+g87_2 = x16_2 + y16_2
+g88_1 = g87_1 + g86_1
+g88_2 = g87_2 + g86_2
+g89_1 = x16_1 + g86_1
+g89_2 = x16_2 + g86_2
+g90_1 = y16_1 + g86_1
+g90_2 = y16_2 + g86_2
+DO and_gmw(P1(g89_1, g90_1), P2(g89_2, g90_2)) GET(g91_1=out1, g91_2=out2)
+g92_1 = g91_1 + g86_1
+g92_2 = g91_2 + g86_2
+g93_1 = x15_1 + y15_1
+g93_2 = x15_2 + y15_2
+g94_1 = g93_1 + g92_1
+g94_2 = g93_2 + g92_2
+g95_1 = x15_1 + g92_1
+g95_2 = x15_2 + g92_2
+g96_1 = y15_1 + g92_1
+g96_2 = y15_2 + g92_2
+DO and_gmw(P1(g95_1, g96_1), P2(g95_2, g96_2)) GET(g97_1=out1, g97_2=out2)
+g98_1 = g97_1 + g92_1
+g98_2 = g97_2 + g92_2
+g99_1 = x14_1 + y14_1
+g99_2 = x14_2 + y14_2
+g100_1 = g99_1 + g98_1
+g100_2 = g99_2 + g98_2
+g101_1 = x14_1 + g98_1
+g101_2 = x14_2 + g98_2
+g102_1 = y14_1 + g98_1
+g102_2 = y14_2 + g98_2
+DO and_gmw(P1(g101_1, g102_1), P2(g101_2, g102_2)) GET(g103_1=out1, g103_2=out2)
+g104_1 = g103_1 + g98_1
+g104_2 = g103_2 + g98_2
+g105_1 = x13_1 + y13_1
+g105_2 = x13_2 + y13_2
+g106_1 = g105_1 + g104_1
+g106_2 = g105_2 + g104_2
+g107_1 = x13_1 + g104_1
+g107_2 = x13_2 + g104_2
+g108_1 = y13_1 + g104_1
+g108_2 = y13_2 + g104_2
+DO and_gmw(P1(g107_1, g108_1), P2(g107_2, g108_2)) GET(g109_1=out1, g109_2=out2)
+g110_1 = g109_1 + g104_1
+g110_2 = g109_2 + g104_2
+g111_1 = x12_1 + y12_1
+g111_2 = x12_2 + y12_2
+g112_1 = g111_1 + g110_1
+g112_2 = g111_2 + g110_2
+g113_1 = x12_1 + g110_1
+g113_2 = x12_2 + g110_2
+g114_1 = y12_1 + g110_1
+g114_2 = y12_2 + g110_2
+DO and_gmw(P1(g113_1, g114_1), P2(g113_2, g114_2)) GET(g115_1=out1, g115_2=out2)
+g116_1 = g115_1 + g110_1
+g116_2 = g115_2 + g110_2
+g117_1 = x11_1 + y11_1
+g117_2 = x11_2 + y11_2
+g118_1 = g117_1 + g116_1
+g118_2 = g117_2 + g116_2
+g119_1 = x11_1 + g116_1
+g119_2 = x11_2 + g116_2
+g120_1 = y11_1 + g116_1
+g120_2 = y11_2 + g116_2
+DO and_gmw(P1(g119_1, g120_1), P2(g119_2, g120_2)) GET(g121_1=out1, g121_2=out2)
+g122_1 = g121_1 + g116_1
+g122_2 = g121_2 + g116_2
+g123_1 = x10_1 + y10_1
+g123_2 = x10_2 + y10_2
+g124_1 = g123_1 + g122_1
+g124_2 = g123_2 + g122_2
+g125_1 = x10_1 + g122_1
+g125_2 = x10_2 + g122_2
+g126_1 = y10_1 + g122_1
+g126_2 = y10_2 + g122_2
+DO and_gmw(P1(g125_1, g126_1), P2(g125_2, g126_2)) GET(g127_1=out1, g127_2=out2)
+g128_1 = g127_1 + g122_1
+g128_2 = g127_2 + g122_2
+g129_1 = x9_1 + y9_1
+g129_2 = x9_2 + y9_2
+g130_1 = g129_1 + g128_1
+g130_2 = g129_2 + g128_2
+g131_1 = x9_1 + g128_1
+g131_2 = x9_2 + g128_2
+g132_1 = y9_1 + g128_1
+g132_2 = y9_2 + g128_2
+DO and_gmw(P1(g131_1, g132_1), P2(g131_2, g132_2)) GET(g133_1=out1, g133_2=out2)
+g134_1 = g133_1 + g128_1
+g134_2 = g133_2 + g128_2
+g135_1 = x8_1 + y8_1
+g135_2 = x8_2 + y8_2
+g136_1 = g135_1 + g134_1
+g136_2 = g135_2 + g134_2
+g137_1 = x8_1 + g134_1
+g137_2 = x8_2 + g134_2
+g138_1 = y8_1 + g134_1
+g138_2 = y8_2 + g134_2
+DO and_gmw(P1(g137_1, g138_1), P2(g137_2, g138_2)) GET(g139_1=out1, g139_2=out2)
+g140_1 = g139_1 + g134_1
+g140_2 = g139_2 + g134_2
+g141_1 = x7_1 + y7_1
+g141_2 = x7_2 + y7_2
+g142_1 = g141_1 + g140_1
+g142_2 = g141_2 + g140_2
+g143_1 = x7_1 + g140_1
+g143_2 = x7_2 + g140_2
+g144_1 = y7_1 + g140_1
+g144_2 = y7_2 + g140_2
+DO and_gmw(P1(g143_1, g144_1), P2(g143_2, g144_2)) GET(g145_1=out1, g145_2=out2)
+g146_1 = g145_1 + g140_1
+g146_2 = g145_2 + g140_2
+g147_1 = x6_1 + y6_1
+g147_2 = x6_2 + y6_2
+g148_1 = g147_1 + g146_1
+g148_2 = g147_2 + g146_2
+g149_1 = x6_1 + g146_1
+g149_2 = x6_2 + g146_2
+g150_1 = y6_1 + g146_1
+g150_2 = y6_2 + g146_2
+DO and_gmw(P1(g149_1, g150_1), P2(g149_2, g150_2)) GET(g151_1=out1, g151_2=out2)
+g152_1 = g151_1 + g146_1
+g152_2 = g151_2 + g146_2
+g153_1 = x5_1 + y5_1
+g153_2 = x5_2 + y5_2
+g154_1 = g153_1 + g152_1
+g154_2 = g153_2 + g152_2
+g155_1 = x5_1 + g152_1
+g155_2 = x5_2 + g152_2
+g156_1 = y5_1 + g152_1
+g156_2 = y5_2 + g152_2
+DO and_gmw(P1(g155_1, g156_1), P2(g155_2, g156_2)) GET(g157_1=out1, g157_2=out2)
+g158_1 = g157_1 + g152_1
+g158_2 = g157_2 + g152_2
+g159_1 = x4_1 + y4_1
+g159_2 = x4_2 + y4_2
+g160_1 = g159_1 + g158_1
+g160_2 = g159_2 + g158_2
+g161_1 = x4_1 + g158_1
+g161_2 = x4_2 + g158_2
+g162_1 = y4_1 + g158_1
+g162_2 = y4_2 + g158_2
+DO and_gmw(P1(g161_1, g162_1), P2(g161_2, g162_2)) GET(g163_1=out1, g163_2=out2)
+g164_1 = g163_1 + g158_1
+g164_2 = g163_2 + g158_2
+g165_1 = x3_1 + y3_1
+g165_2 = x3_2 + y3_2
+g166_1 = g165_1 + g164_1
+g166_2 = g165_2 + g164_2
+g167_1 = x3_1 + g164_1
+g167_2 = x3_2 + g164_2
+g168_1 = y3_1 + g164_1
+g168_2 = y3_2 + g164_2
+DO and_gmw(P1(g167_1, g168_1), P2(g167_2, g168_2)) GET(g169_1=out1, g169_2=out2)
+g170_1 = g169_1 + g164_1
+g170_2 = g169_2 + g164_2
+g171_1 = x2_1 + y2_1
+g171_2 = x2_2 + y2_2
+g172_1 = g171_1 + g170_1
+g172_2 = g171_2 + g170_2
+g173_1 = x2_1 + g170_1
+g173_2 = x2_2 + g170_2
+g174_1 = y2_1 + g170_1
+g174_2 = y2_2 + g170_2
+DO and_gmw(P1(g173_1, g174_1), P2(g173_2, g174_2)) GET(g175_1=out1, g175_2=out2)
+g176_1 = g175_1 + g170_1
+g176_2 = g175_2 + g170_2
+g177_1 = x1_1 + y1_1
+g177_2 = x1_2 + y1_2
+g178_1 = g177_1 + g176_1
+g178_2 = g177_2 + g176_2
+g179_1 = x1_1 + g176_1
+g179_2 = x1_2 + g176_2
+g180_1 = y1_1 + g176_1
+g180_2 = y1_2 + g176_2
+DO and_gmw(P1(g179_1, g180_1), P2(g179_2, g180_2)) GET(g181_1=out1, g181_2=out2)
+g182_1 = g181_1 + g176_1
+g182_2 = g181_2 + g176_2
+g183_1 = x0_1 + y0_1
+g183_2 = x0_2 + y0_2
+g184_1 = g183_1 + g182_1
+g184_2 = g183_2 + g182_2
+g185_1 = x0_1 + g182_1
+g185_2 = x0_2 + g182_2
+g186_1 = y0_1 + g182_1
+g186_2 = y0_2 + g182_2
+DO and_gmw(P1(g185_1, g186_1), P2(g185_2, g186_2)) GET(g187_1=out1, g187_2=out2)
+g188_1 = g187_1 + g182_1
+g188_2 = g187_2 + g182_2
+
+-- Reveal output
+DO reveal(P1(g1_1), P2(g1_2)) GET(r0=y)
+OUTPUT r0
+DO reveal(P1(g4_1), P2(g4_2)) GET(r1=y)
+OUTPUT r1
+DO reveal(P1(g10_1), P2(g10_2)) GET(r2=y)
+OUTPUT r2
+DO reveal(P1(g16_1), P2(g16_2)) GET(r3=y)
+OUTPUT r3
+DO reveal(P1(g22_1), P2(g22_2)) GET(r4=y)
+OUTPUT r4
+DO reveal(P1(g28_1), P2(g28_2)) GET(r5=y)
+OUTPUT r5
+DO reveal(P1(g34_1), P2(g34_2)) GET(r6=y)
+OUTPUT r6
+DO reveal(P1(g40_1), P2(g40_2)) GET(r7=y)
+OUTPUT r7
+DO reveal(P1(g46_1), P2(g46_2)) GET(r8=y)
+OUTPUT r8
+DO reveal(P1(g52_1), P2(g52_2)) GET(r9=y)
+OUTPUT r9
+DO reveal(P1(g58_1), P2(g58_2)) GET(r10=y)
+OUTPUT r10
+DO reveal(P1(g64_1), P2(g64_2)) GET(r11=y)
+OUTPUT r11
+DO reveal(P1(g70_1), P2(g70_2)) GET(r12=y)
+OUTPUT r12
+DO reveal(P1(g76_1), P2(g76_2)) GET(r13=y)
+OUTPUT r13
+DO reveal(P1(g82_1), P2(g82_2)) GET(r14=y)
+OUTPUT r14
+DO reveal(P1(g88_1), P2(g88_2)) GET(r15=y)
+OUTPUT r15
+DO reveal(P1(g94_1), P2(g94_2)) GET(r16=y)
+OUTPUT r16
+DO reveal(P1(g100_1), P2(g100_2)) GET(r17=y)
+OUTPUT r17
+DO reveal(P1(g106_1), P2(g106_2)) GET(r18=y)
+OUTPUT r18
+DO reveal(P1(g112_1), P2(g112_2)) GET(r19=y)
+OUTPUT r19
+DO reveal(P1(g118_1), P2(g118_2)) GET(r20=y)
+OUTPUT r20
+DO reveal(P1(g124_1), P2(g124_2)) GET(r21=y)
+OUTPUT r21
+DO reveal(P1(g130_1), P2(g130_2)) GET(r22=y)
+OUTPUT r22
+DO reveal(P1(g136_1), P2(g136_2)) GET(r23=y)
+OUTPUT r23
+DO reveal(P1(g142_1), P2(g142_2)) GET(r24=y)
+OUTPUT r24
+DO reveal(P1(g148_1), P2(g148_2)) GET(r25=y)
+OUTPUT r25
+DO reveal(P1(g154_1), P2(g154_2)) GET(r26=y)
+OUTPUT r26
+DO reveal(P1(g160_1), P2(g160_2)) GET(r27=y)
+OUTPUT r27
+DO reveal(P1(g166_1), P2(g166_2)) GET(r28=y)
+OUTPUT r28
+DO reveal(P1(g172_1), P2(g172_2)) GET(r29=y)
+OUTPUT r29
+DO reveal(P1(g178_1), P2(g178_2)) GET(r30=y)
+OUTPUT r30
+DO reveal(P1(g184_1), P2(g184_2)) GET(r31=y)
+OUTPUT r31

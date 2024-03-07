@@ -1,0 +1,7 @@
+circuit,protocol,iters,train_size,test_size,pval,data_time,d_tree_time,bias_sharing,bias_and,accidental_secret,accidental_gate,outputs
+less_than_3.txt,beaver,512,8192,2048,1.0,133.25,29.58,0,0,0,0,values
+less_than_3.txt,beaver,512,8192,2048,1.0,137.03,29.22,0,0,0,0,values
+less_than_3.txt,beaver,512,8192,2048,1.0,138.81,30.76,0,0,0,0,values
+less_than_3.txt,beaver,512,8192,2048,1.0,181.21,31.82,0,0,0,16,values
+less_than_3.txt,beaver,512,8192,2048,1.0,177.25,30.87,0,0,0,16,values
+less_than_3.txt,beaver,512,8192,2048,1.0,178.29,31.28,0,0,0,16,values

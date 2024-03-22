@@ -1,0 +1,163 @@
+\begin{thebibliography}{10}
+
+\bibitem{almeida2018enforcing}
+Jos{\'e}~Bacelar Almeida, Manuel Barbosa, Gilles Barthe, Hugo Pacheco, Vitor
+  Pereira, and Bernardo Portela.
+\newblock Enforcing ideal-world leakage bounds in real-world secret sharing mpc
+  frameworks.
+\newblock In {\em 2018 IEEE 31st Computer Security Foundations Symposium
+  (CSF)}, pages 132--146. IEEE, 2018.
+
+\bibitem{barthe2019probabilistic}
+Gilles Barthe, Justin Hsu, and Kevin Liao.
+\newblock A probabilistic separation logic.
+\newblock {\em Proceedings of the ACM on Programming Languages}, 4(POPL):1--30,
+  2019.
+
+\bibitem{beaver1992efficient}
+Donald Beaver.
+\newblock Efficient multiparty protocols using circuit randomization.
+\newblock In {\em Advances in Cryptology—CRYPTO’91: Proceedings 11}, pages
+  420--432. Springer, 1992.
+
+\bibitem{chalupka2018fast}
+Krzysztof Chalupka, Pietro Perona, and Frederick Eberhardt.
+\newblock Fast conditional independence test for vector variables with large
+  sample sizes.
+\newblock {\em arXiv preprint arXiv:1804.02747}, 2018.
+
+\bibitem{claessen2000quickcheck}
+Koen Claessen and John Hughes.
+\newblock Quickcheck: a lightweight tool for random testing of haskell
+  programs.
+\newblock In {\em Proceedings of the fifth ACM SIGPLAN international conference
+  on Functional programming}, pages 268--279, 2000.
+
+\bibitem{darais2019language}
+David Darais, Ian Sweet, Chang Liu, and Michael Hicks.
+\newblock A language for probabilistically oblivious computation.
+\newblock {\em Proceedings of the ACM on Programming Languages}, 4(POPL):1--31,
+  2019.
+
+\bibitem{ding2018detecting}
+Zeyu Ding, Yuxin Wang, Guanhong Wang, Danfeng Zhang, and Daniel Kifer.
+\newblock Detecting violations of differential privacy.
+\newblock In {\em Proceedings of the 2018 ACM SIGSAC Conference on Computer and
+  Communications Security}, pages 475--489, 2018.
+
+\bibitem{evans2018pragmatic}
+David Evans, Vladimir Kolesnikov, Mike Rosulek, et~al.
+\newblock A pragmatic introduction to secure multi-party computation.
+\newblock {\em Foundations and Trends{\textregistered} in Privacy and
+  Security}, 2(2-3):70--246, 2018.
+
+\bibitem{fink1997property}
+George Fink and Matt Bishop.
+\newblock Property-based testing: a new approach to testing for assurance.
+\newblock {\em ACM SIGSOFT Software Engineering Notes}, 22(4):74--80, 1997.
+
+\bibitem{fournet2011information}
+C{\'e}dric Fournet, J{\'e}r{\'e}my Planul, and Tamara Rezk.
+\newblock Information-flow types for homomorphic encryptions.
+\newblock In {\em Proceedings of the 18th ACM conference on Computer and
+  communications security}, pages 351--360, 2011.
+
+\bibitem{gancher2023owl}
+Joshua Gancher, Sydney Gibson, Pratap Singh, Samvid Dharanikota, and Bryan
+  Parno.
+\newblock Owl: Compositional verification of security protocols via an
+  information-flow type system.
+\newblock In {\em 2023 IEEE Symposium on Security and Privacy (SP)}, pages
+  1130--1147. IEEE Computer Society, 2023.
+
+\bibitem{gancher2023core}
+Joshua Gancher, Kristina Sojakova, Xiong Fan, Elaine Shi, and Greg Morrisett.
+\newblock A core calculus for equational proofs of cryptographic protocols.
+\newblock {\em Proceedings of the ACM on Programming Languages},
+  7(POPL):866--892, 2023.
+
+\bibitem{goldreich2009foundations}
+Oded Goldreich.
+\newblock {\em Foundations of cryptography: volume 2, basic applications}.
+\newblock Cambridge university press, 2009.
+
+\bibitem{goldreich2019play}
+Oded Goldreich, Silvio Micali, and Avi Wigderson.
+\newblock How to play any mental game, or a completeness theorem for protocols
+  with honest majority.
+\newblock In Oded Goldreich, editor, {\em Providing Sound Foundations for
+  Cryptography: On the Work of Shafi Goldwasser and Silvio Micali}, pages
+  307--328. Association for Computing Machinery, New York, NY, USA, 2019.
+
+\bibitem{gorinova2021conditional}
+Maria~I Gorinova, Andrew~D Gordon, Charles Sutton, and Matthijs V{\'a}k{\'a}r.
+\newblock Conditional independence by typing.
+\newblock {\em ACM Transactions on Programming Languages and Systems (TOPLAS)},
+  44(1):1--54, 2021.
+
+\bibitem{haagh2018computer}
+Helene Haagh, Aleksandr Karbyshev, Sabine Oechsner, Bas Spitters, and
+  Pierre-Yves Strub.
+\newblock Computer-aided proofs for multiparty computation with active
+  security.
+\newblock In {\em 2018 IEEE 31st Computer Security Foundations Symposium
+  (CSF)}, pages 119--131. IEEE, 2018.
+
+\bibitem{holtzen2020scaling}
+Steven Holtzen, Guy Van~den Broeck, and Todd Millstein.
+\newblock Scaling exact inference for discrete probabilistic programs.
+\newblock {\em Proceedings of the ACM on Programming Languages},
+  4(OOPSLA):1--31, 2020.
+
+\bibitem{kilian1988founding}
+Joe Kilian.
+\newblock Founding crytpography on oblivious transfer.
+\newblock In {\em Proceedings of the twentieth annual ACM symposium on Theory
+  of computing}, pages 20--31, 1988.
+
+\bibitem{li2023lilac}
+John~M Li, Amal Ahmed, and Steven Holtzen.
+\newblock Lilac: a modal separation logic for conditional probability.
+\newblock {\em Proceedings of the ACM on Programming Languages},
+  7(PLDI):148--171, 2023.
+
+\bibitem{paraskevopoulou2015foundational}
+Zoe Paraskevopoulou, C{\u{a}}t{\u{a}}lin Hri{\c{t}}cu, Maxime D{\'e}n{\`e}s,
+  Leonidas Lampropoulos, and Benjamin~C Pierce.
+\newblock Foundational property-based testing.
+\newblock In {\em Interactive Theorem Proving: 6th International Conference,
+  ITP 2015, Nanjing, China, August 24-27, 2015, Proceedings 6}, pages 325--343.
+  Springer, 2015.
+
+\bibitem{poon2011sum}
+Hoifung Poon and Pedro Domingos.
+\newblock Sum-product networks: A new deep architecture.
+\newblock In {\em 2011 IEEE International Conference on Computer Vision
+  Workshops (ICCV Workshops)}, pages 689--690. IEEE, 2011.
+
+\bibitem{rastogi2014wysteria}
+Aseem Rastogi, Matthew~A Hammer, and Michael Hicks.
+\newblock Wysteria: A programming language for generic, mixed-mode multiparty
+  computations.
+\newblock In {\em 2014 IEEE Symposium on Security and Privacy}, pages 655--670.
+  IEEE, 2014.
+
+\bibitem{saad2021sppl}
+Feras~A Saad, Martin~C Rinard, and Vikash~K Mansinghka.
+\newblock Sppl: probabilistic programming with fast exact symbolic inference.
+\newblock In {\em Proceedings of the 42nd ACM SIGPLAN International Conference
+  on Programming Language Design and Implementation}, pages 804--819, 2021.
+
+\bibitem{yao1986generate}
+Andrew Chi-Chih Yao.
+\newblock How to generate and exchange secrets.
+\newblock In {\em 27th annual symposium on foundations of computer science
+  (Sfcs 1986)}, pages 162--167. IEEE, 1986.
+
+\bibitem{zhang2020testing}
+Hengchu Zhang, Edo Roth, Andreas Haeberlen, Benjamin~C Pierce, and Aaron Roth.
+\newblock Testing differential privacy with dual interpreters.
+\newblock {\em Proceedings of the ACM on Programming Languages},
+  4(OOPSLA):1--26, 2020.
+
+\end{thebibliography}

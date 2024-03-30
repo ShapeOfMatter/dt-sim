@@ -1,0 +1,8 @@
+sec = SECRET @H  -- The honest party has a secret bit.
+pub = SECRET @C  -- The corrupt party explicity chooses this bit.
+
+SEND pub TO H    -- C shares their bit with H,
+x = flp XOR sec  -- who adds it to sec.
+SEND x TO C      -- H shares the computed value with C
+
+OUTPUT x         -- Both parties write out x.

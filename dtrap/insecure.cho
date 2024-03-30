@@ -1,0 +1,8 @@
+sec = SECRET @H  -- The honest party has a secret bit.
+flp = FLIP @C    -- The corrupt party generates a random bit.
+
+SEND flp TO H    -- C shares the random bit with H.
+x = flp XOR sec  -- H (foolishly) uses it to obfuscate sec.
+SEND x TO C      -- H shares the computed value with C
+
+OUTPUT x         -- Both parties write out x.

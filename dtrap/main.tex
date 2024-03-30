@@ -47,46 +47,76 @@
 %%\citestyle{acmauthoryear}
 
 
-%\usepackage{cite}
-%\usepackage{amsmath,amssymb,amsfonts}
 \usepackage{amsmath,amsfonts}
-\usepackage{algorithm,algorithmic}  %% typset algorithms
-
-\usepackage{graphicx}
-\usepackage{textcomp}
-\usepackage{xcolor}
-\usepackage{booktabs}
-%\usepackage[hidelinks]{hyperref}
-
 \usepackage{amsthm}
-\usepackage{textgreek}
-\usepackage{xspace}
-\usepackage{centernot}
-
-% use these if you also want π to work in math mode
-\usepackage{newunicodechar}
-\newunicodechar{Π}{\ifmmode\Pi\else\textPi\fi}
-\newunicodechar{⫫}{\mathrel{\perp\!\!\!\perp}}
-
-% use quotes as smart-quotes. https://tex.stackexchange.com/a/52354
-%\usepackage [english]{babel}
+\usepackage{algorithm,algorithmic}  %% typset algorithms
+\usepackage{arydshln}
 \usepackage [autostyle, english = american]{csquotes}
-\MakeOuterQuote{"}
+\usepackage{booktabs}  %% What is this for?
+\usepackage{centernot}
 \usepackage{graphicx}
-
-%the template suggests we shouldn't do this.
-%\renewcommand{\paragraph}[1]{\vspace*{2pt}\noindent\textbf{#1}}
-
-\newcommand{\langname}{\textsc{\textbf{.}CHO}\xspace}
-\newcommand{\toolname}{\textsc{DT-SIM}\xspace}
-\newcommand{\ie}{\textit{i.e.}\xspace}
-\newcommand{\eg}{\textit{e.g.}\xspace}
+\usepackage{listings}
+\usepackage{mdframed}
+\usepackage{multirow}
+\usepackage{newunicodechar}
+\usepackage{textcomp}
+\usepackage{textgreek}
+\usepackage{xcolor}
+\usepackage{xspace}
 
 \makeatletter
 \newif\ifanonymous
 \@ifclasswith{acmart}{anonymous}{\anonymoustrue}{\anonymousfalse}
 \makeatother
+
+%https://tex.stackexchange.com/a/169103
+\setlength\dashlinedash{0.2pt}
+\setlength\dashlinegap{2.0pt}
+\setlength\arrayrulewidth{0.3pt}
+
+\lstdefinelanguage{cho}{
+    alsoletter={@01},
+    sensitive=true,
+    basicstyle={\ttfamily},
+    morekeywords=[1]{MACRO,AS,ENDMACRO},
+    keywordstyle=[1]{\bfseries},
+    morekeywords=[2]{SEND,TO,OBLIVIOUSLY,FOR,OUTPUT,SECRET,FLIP},
+    keywordstyle=[2]{\bfseries\color{blue}},
+    morekeywords=[3]{DO,GET},
+    keywordstyle=[3]{\bfseries},
+    morekeywords=[4]{XOR,+,<>,!=,AND,*,^,NOT,!,~},
+    keywordstyle=[4]{},
+    morekeywords=[5]{true,false,0,1},
+    keywordstyle=[5]{\color{teal}},
+    identifierstyle={\color{violet}},
+    morecomment=[l]{--},
+    morecomment=[s]{\{-}{-\}},
+    commentstyle={\color{gray}},
+    numbers={left},
+    xleftmargin=20px,
+    numberstyle={\color{gray}\itshape},
+    numbersep=15px,
+}
+
+% use these if you also want π to work in math mode
+\newunicodechar{Π}{\ifmmode\Pi\else\textPi\fi}
+\newunicodechar{⫫}{\mathrel{\perp\!\!\!\perp}}
+
+% use quotes as smart-quotes. https://tex.stackexchange.com/a/52354
+\MakeOuterQuote{"}
+
+%the template suggests we shouldn't do this.
+%\renewcommand{\paragraph}[1]{\vspace*{2pt}\noindent\textbf{#1}}
+
+\newcommand{\bigpar}[1]{\left( #1 \right)}
+\newcommand{\eg}{\textit{e.g.}\xspace}
 \newcommand{\github}{\ifanonymous redacted for anonymous submission\else https://github.com/ShapeOfMatter/dt-sim\fi}
+\newcommand{\ie}{\textit{i.e.}\xspace}
+\newcommand{\inlinecode}[2][cho]{\lstinline[language=#1]{#2}}
+\newcommand{\langname}{\textsc{\textbf{.}CHO}\xspace}
+\newcommand{\negquad}{\!\!\!\!}
+\newcommand{\toolname}{\textsc{DT-SIM}\xspace}
+\newcommand{\vertvec}[1]{\left\langle { \renewcommand*{\arraystretch}{1}\begin{matrix} #1 \end{matrix} } \right\rangle}
 
 \newcommand{\mynote}[2]
     {{\color{red} \fbox{\bfseries\sffamily\scriptsize#1}
@@ -257,31 +287,164 @@ but techniques have been found to improve performance somewhat.
 The traditional expression of MPC assumes a pre-determined function $F$, the \emph{functionality},
 mapping the tuple of all participants' input vectors to the respective tuple of output vectors
 (or to distributions of outputs, if $F$ is non-deterministic).
+For example, the protocol in Figure~\ref{fig:example-vac-secure} implements the following function:
+$$F_3\bigpar{\vertvec{\mathtt{sec}}, \vertvec{\mathtt{pub}}}
+  := \bigpar{\vertvec{\mathtt{sec} \neq \mathtt{pub}}, \vertvec{\mathtt{sec} \neq \mathtt{pub}}}$$
 In an \termOfArt{ideal world}, a trusted third party (the \termOfArt{ideal functionality}) would accept input messages
 from all other parties, compute $F$, and then send the parties their respective outputs.
+The ideal functionality implemented by the protocol in in Figure~\ref{fig:example-insecure}
+could be reasonably implemented by just declaring a coin from someone's pocket to be the \textit{"trusted third party"},
+and ascribing \inlinecode{true} and \inlinecode{false} to heads and tails.
 A \termOfArt{real world} protocol $Π$ is said to \emph{correctly} implement $F$ if, for all possible inputs,
 $Π$ results in all parties getting the same outputs as they would have in the ideal world.
-The \emph{security} of $Π$ is expressed in terms of a particular threat model and the participants' "views".
+The \emph{security} of $Π$ is expressed in terms of a particular threat model and the participants' \textit{"views"}.
 The \termOfArt{ideal world view}, $\mathsf{Ideal}_P(F,\vec{x})$, of a party $P$ is what it sees when running $F$ in the ideal world:
 just its inputs $\vec{x}_P$ and its outputs $\vec{y}_P$.
+For example, \inlinecode{C}'s ideal world view of an execution of the protocol in Figure~\ref{fig:example-vac-protocol}
+would be a single random bit, the value of \inlinecode{x} in that execution.
 The \termOfArt{real world view}, $\mathsf{Real}_P(Π, \vec{x})$, of a party $P$ is everything it sees while executing its part of $Π$ in the real world:
 its inputs, outputs, all messages it receives, and all the bits of random tape it uses.
-Both these concepts extend naturally to lists of parties.
+Continuing the example of Figure~\ref{fig:example-vac-protocol}, \inlinecode{C}'s real world view would additionally contain
+the (independent) random value \inlinecode{_un}
+(and technically a duplicate of \inlinecode{x}, because it's both output and a received message).
+Both kinds of views extend naturally to lists of parties.
 
-\textbf{Passive security}
+\begin{figure}[tbhp]
+  \begin{mdframed}
+      \lstinputlisting[language=cho]{insecure.cho}
+  \end{mdframed}
+  %\newcommand{\gsize}{.38\textwidth}
+  \caption{An example protocol written in \langname.
+    This protocol does \emph{not} demonstrate MPC security.
+    It's ideal functionality is \textit{"flip a coin"},
+    because the one-bit output is uniformly distributed regardless of anyone's \inlinecode{SECRET}s.}
+  \label{fig:example-insecure}
+\end{figure}
+\begin{figure}[tbhp]
+  \begin{mdframed}
+      \lstinputlisting[language=cho]{vac_protocol.cho}
+  \end{mdframed}
+  %\newcommand{\gsize}{.38\textwidth}
+  \caption{An example protocol written in \langname.
+    This protocol \emph{does} demonstrate MPC security, although it's ideal functionality is just \textit{"flip a coin"}.}
+  \label{fig:example-vac-protocol}
+\end{figure}
+\begin{figure}[tbhp]
+  \begin{mdframed}
+      \lstinputlisting[language=cho]{vac_secure.cho}
+  \end{mdframed}
+  %\newcommand{\gsize}{.38\textwidth}
+  \caption{An example protocol written in \langname.
+    This protocol \emph{does} demonstrate MPC security,
+    although such security is vacuous because \inlinecode{C} could compute \inlinecode{H}'s \inlinecode{SECRET}
+    from the ideal functionality: \textit{"return the xor of the secret and public values"}.}
+  \label{fig:example-vac-secure}
+\end{figure}
+
+\begin{table}
+  \centering
+  \renewcommand*{\arraystretch}{2}
+  \begin{tabular}{| c c c c |}
+    \hline
+      \textbf{Ideal Functionality} & \textbf{Implementation} & \textbf{MPC Secure?} & \\
+      \hdashline
+      \multicolumn{2}{| c}{\textit{Ideal World Views}} & \multicolumn{2}{c |}{\textit{Real World Views}}  \\
+    \hline
+      $\mathsf{PMF}\big[F_1(\mathtt{sec})\big] := \mathsf{u}(\mathtt{0}, \mathtt{1})$ &
+        Figure~\ref{fig:example-insecure} &
+        No &
+        \\\hdashline
+        \multicolumn{2}{| c}{\begin{tabular}{l l}
+            $\mathsf{Ideal}_\mathtt{C}\bigpar{F_1,\vertvec{\mathtt{sec}:\mathtt{0}}}$ & \negquad\!\!\! $\leftsquigarrow
+             \mathsf{u}\bigpar{\vertvec{ \mathtt{x}:\mathtt{0} }, \vertvec{ \mathtt{x}:\mathtt{1} }}$ \\
+            $\mathsf{Ideal}_\mathtt{C}\bigpar{F_1, \vertvec{ \mathtt{sec}:\mathtt{1} }}$ & \negquad\!\!\! $\leftsquigarrow
+             \mathsf{u}\bigpar{\vertvec{ \mathtt{x}:\mathtt{0} }, \vertvec{ \mathtt{x}:\mathtt{1} }}$
+        \end{tabular}} &
+        \multicolumn{2}{c |}{\begin{tabular}{l l}
+            $\mathsf{Real}_\mathtt{C}\bigpar{F_1, \vertvec{ \mathtt{sec}:\mathtt{0} }}$ & \negquad\!\!\! $\leftsquigarrow
+             \mathsf{u}\bigpar{\vertvec{ \mathtt{flp}:\mathtt{0} \\ \mathtt{x}:\mathtt{0} },
+                               \vertvec{ \mathtt{flp}:\mathtt{1} \\ \mathtt{x}:\mathtt{1} }}$ \\
+            $\mathsf{Real}_\mathtt{C}\bigpar{F_1, \vertvec{ \mathtt{sec}:\mathtt{1} }}$ & \negquad\!\!\! $\leftsquigarrow
+             \mathsf{u}\bigpar{\vertvec{\mathtt{flp}:\mathtt{0} \\ \mathtt{x}:\mathtt{1}},
+                               \vertvec{\mathtt{flp}:\mathtt{1} \\ \mathtt{x}:\mathtt{0}}}$
+        \end{tabular}}
+        \\
+      \hline
+      $\mathsf{PMF}\big[F_2(\mathtt{sec})\big] := \mathsf{u}(\mathtt{0}, \mathtt{1})$ &
+        Figure~\ref{fig:example-vac-protocol} &
+        Yes &
+        \\\hdashline
+        \multicolumn{2}{| c}{\begin{tabular}{l l}
+            $\mathsf{Ideal}_\mathtt{C}\bigpar{F_2,\vertvec{\mathtt{sec}:\mathtt{0}}}$ & \negquad\!\!\! $\leftsquigarrow
+             \mathsf{u}\bigpar{\vertvec{ \mathtt{x}:\mathtt{0} }, \vertvec{ \mathtt{x}:\mathtt{1} }}$ \\
+            $\mathsf{Ideal}_\mathtt{C}\bigpar{F_2, \vertvec{ \mathtt{sec}:\mathtt{1} }}$ & \negquad\!\!\! $\leftsquigarrow
+             \mathsf{u}\bigpar{\vertvec{ \mathtt{x}:\mathtt{0} }, \vertvec{ \mathtt{x}:\mathtt{1} }}$
+        \end{tabular}} &
+        \multicolumn{2}{c |}{\begin{tabular}{l l}
+            $\mathsf{Real}_\mathtt{C}\bigpar{F_2, \vertvec{ \mathtt{sec}:\mathtt{0} }}$ & \negquad\!\!\! $\leftsquigarrow
+             \mathsf{u}\bigpar{\vertvec{ \mathtt{\_un}:\mathtt{0} \\ \mathtt{x}:\mathtt{0} },
+                               \vertvec{ \mathtt{\_un}:\mathtt{0} \\ \mathtt{x}:\mathtt{1} },
+                               \vertvec{ \mathtt{\_un}:\mathtt{1} \\ \mathtt{x}:\mathtt{0} },
+                               \vertvec{ \mathtt{\_un}:\mathtt{1} \\ \mathtt{x}:\mathtt{1} }}$ \\
+            $\mathsf{Real}_\mathtt{C}\bigpar{F_2, \vertvec{ \mathtt{sec}:\mathtt{1} }}$ & \negquad\!\!\! $\leftsquigarrow
+             \mathsf{u}\bigpar{\vertvec{ \mathtt{\_un}:\mathtt{0} \\ \mathtt{x}:\mathtt{0} },
+                               \vertvec{ \mathtt{\_un}:\mathtt{0} \\ \mathtt{x}:\mathtt{1} },
+                               \vertvec{ \mathtt{\_un}:\mathtt{1} \\ \mathtt{x}:\mathtt{0} },
+                               \vertvec{ \mathtt{\_un}:\mathtt{1} \\ \mathtt{x}:\mathtt{1} }}$
+        \end{tabular}}
+        \\
+      \hline
+      $F_3(\mathtt{sec}, \mathtt{pub}) := \mathtt{sec} \neq \mathtt{pub}$ &
+        Figure~\ref{fig:example-vac-secure} &
+        Yes &
+        \\\hdashline
+        \multicolumn{2}{| c}{\begin{tabular}{l l}
+            $\mathsf{Ideal}_\mathtt{C}\bigpar{F_3,\vertvec{ \mathtt{sec}:\mathtt{0} \\ \mathtt{pub}:\mathtt{0} }}$ & \negquad\!\!\! $\leftsquigarrow
+             \mathsf{u}\bigpar{\vertvec{ \mathtt{pub}:\mathtt{0} \\ \mathtt{x}:\mathtt{0} }}$ \\
+            $\mathsf{Ideal}_\mathtt{C}\bigpar{F_3,\vertvec{ \mathtt{sec}:\mathtt{0} \\ \mathtt{pub}:\mathtt{1} }}$ & \negquad\!\!\! $\leftsquigarrow
+             \mathsf{u}\bigpar{\vertvec{ \mathtt{pub}:\mathtt{1} \\ \mathtt{x}:\mathtt{1} }}$ \\
+            $\mathsf{Ideal}_\mathtt{C}\bigpar{F_3,\vertvec{ \mathtt{sec}:\mathtt{1} \\ \mathtt{pub}:\mathtt{0} }}$ & \negquad\!\!\! $\leftsquigarrow
+             \mathsf{u}\bigpar{\vertvec{ \mathtt{pub}:\mathtt{0} \\ \mathtt{x}:\mathtt{1} }}$ \\
+            $\mathsf{Ideal}_\mathtt{C}\bigpar{F_3,\vertvec{ \mathtt{sec}:\mathtt{1} \\ \mathtt{pub}:\mathtt{1} }}$ & \negquad\!\!\! $\leftsquigarrow
+             \mathsf{u}\bigpar{\vertvec{ \mathtt{pub}:\mathtt{1} \\ \mathtt{x}:\mathtt{0} }}$ \\
+        \end{tabular}} &
+        \multicolumn{2}{c |}{\begin{tabular}{l l}
+            $\mathsf{Real}_\mathtt{C}\bigpar{F_3, \vertvec{ \mathtt{sec}:\mathtt{0} \\ \mathtt{pub}:\mathtt{0} }}$ & \negquad\!\!\! $\leftsquigarrow
+             \mathsf{u}\bigpar{\vertvec{ \mathtt{pub}:\mathtt{0} \\ \mathtt{x}:\mathtt{0} }}$ \\
+            $\mathsf{Real}_\mathtt{C}\bigpar{F_3, \vertvec{ \mathtt{sec}:\mathtt{0} \\ \mathtt{pub}:\mathtt{1} }}$ & \negquad\!\!\! $\leftsquigarrow
+             \mathsf{u}\bigpar{\vertvec{ \mathtt{pub}:\mathtt{1} \\ \mathtt{x}:\mathtt{1} }}$ \\
+            $\mathsf{Real}_\mathtt{C}\bigpar{F_3, \vertvec{ \mathtt{sec}:\mathtt{1} \\ \mathtt{pub}:\mathtt{0} }}$ & \negquad\!\!\! $\leftsquigarrow
+             \mathsf{u}\bigpar{\vertvec{ \mathtt{pub}:\mathtt{0} \\ \mathtt{x}:\mathtt{1} }}$ \\
+            $\mathsf{Real}_\mathtt{C}\bigpar{F_3, \vertvec{ \mathtt{sec}:\mathtt{1} \\ \mathtt{pub}:\mathtt{1} }}$ & \negquad\!\!\! $\leftsquigarrow
+             \mathsf{u}\bigpar{\vertvec{ \mathtt{pub}:\mathtt{1} \\ \mathtt{x}:\mathtt{0} }}$ \\
+        \end{tabular}}
+        \\
+    \hline
+  \end{tabular}
+  \bigskip
+    \caption{A summary of some introductory examples of protocols.
+    The exact structure with which views are represented is purely a matter of notation;
+    here we use flat vectors of \inlinecode{variable:value} bindings,
+    and we omit duplicates.
+    We denote a uniform distribution across a finite list as $\mathsf{u}(\dots)$,
+    and $\leftsquigarrow$ denotes sampling.
+    \inlinecode{0} and \inlinecode{1} are synonymous with \inlinecode{false} and \inlinecode{true} respectively.
+    Since $F_3$ is deterministic, we define it directly as a function instead of a Probability Mass Function ($\mathsf{PMF}$);
+    that \inlinecode{C}'s views of its implementation happen to also be deterministic is incidental.}
+  \label{tbl:examples}
+\end{table}
+%}
+
+
+\termOfArt{Passive security}
 supposes a computationally-bounded adversary
 that can see everything happening inside a fixed subset of the participating machines.
 This passive adversary cannot cause the parties to deviate from the protocol $Π$ in any way;
-we are interested in whether it can learn anything \emph{beyond} the outputs of the "corrupted" machines
+we are interested in whether it can learn anything \emph{beyond} the outputs of the \termOfArt{corrupted} machines
 by observing the execution of $Π$.
 As an example, this notion of security might be of interest if Alice trusted Bob to participate
 in a distributed computation with her, but did not trust him to properly store or destroy the log-files
 generated.
-The \termOfArt{ideal world view}, $\mathsf{Ideal}_P(F,\vec{x})$, of a party $P$ is what it sees when running $F$ in the ideal world:
-just its inputs $\vec{x}_P$ and its outputs $\vec{y}_P$.
-The \termOfArt{real world view}, $\mathsf{Real}_P(Π, \vec{x})$, of a party $P$ is everything it sees while executing its part of $Π$ in the real world:
-its inputs, outputs, all messages it receives, and all the bits of random tape it uses.
-Both these concepts extend naturally to lists of parties.
 
 \begin{definition}[Passive MPC Security]\label{def:passive-mpc}
   \begin{samepage}
@@ -324,11 +487,10 @@ Then we can collapse all the corrupted parties $C$ into a single party $\mathrm{
 and similarly all the other parties into a single party $\mathrm{H}$ (for "honest")\footnote{
     We don't always do this, it's not required for \toolname to work.
 }.
-Finally, in this work we assume that protocols implement their functionalities \emph{correctly};
-the corresponding $F$ is implicit.
-In other words, we define $F$ to be whatever mapping of inputs to outputs results from the execution of $Π$.
-This present work describes a system for property-based testing of MPC \emph{security};
+Finally, this work describes a system for property-based testing of MPC \emph{security};
 a corresponding test of \emph{correctness} is trivial for any pre-defined $F$.
+Therefore we assume that protocols implement their functionalities correctly and leave the corresponding $F$ implicit.
+In other words, we define a respective $F$ to be whatever mapping from inputs to outputs that results from the execution of any given $Π$.
 
 \textbf{Active security}
 (sometimes "malicious security")
@@ -350,10 +512,13 @@ In the first case, $Π$ itself may be vacuous.
 A \termOfArt{vacuous protocol}\footnote{
     This terminology is new; we needed it to talk though problems we encountered in during this project.
 }, one in which no information (random bits don't count) is communicated, is automatically secure.
-(Of course the functionality implemented by a vacuous protocol will be trivial.)
+(Of course the functionality implemented by a vacuous protocol will be trivial.
+For example consider the protocol in Figure~\ref{fig:example-vac-protocol}.)
 On the other hand, if the ideal-world adversary can efficiently deduce a unique possible honest input upon observing the corrupt output,
 then the protocol is \termOfArt{vacuously secure}:
 any \emph{correct} implementation of that functionality is \emph{secure} regardless of what's communicated.
+For example the protocol in Figure~\ref{fig:example-vac-secure} is vacuously secure,
+and could even be amended to send \inlinecode{sec} itself and still be secure.
 These extremes mark the ends of a spectrum; most protocols are somewhere in the middle,
 where learning the output focuses the corrupt party's distribution-estimate of the honest secrets but still leaves some uncertainty.
 This spectrum doesn't capture the assumptions about the adversary's computational limits;
@@ -461,7 +626,7 @@ is a requisite feature of MPC security.
 In other words
 %
 $$
-\left( \vec{y}_H \centernot{⫫} \mathsf{Real}_C(Π, \vec{x}) \mid \mathsf{Ideal}_C(F,\vec{x}) \right)
+\bigpar{ \vec{y}_H \centernot{⫫} \mathsf{Real}_C\bigpar{Π, \vec{x}} \mid \mathsf{Ideal}_C\bigpar{F,\vec{x}} }
 \rightarrow
 \nexists \; \mathtt{SIM}
 $$
@@ -610,6 +775,62 @@ Oblivious transfer is a building block for many other protocols, including the G
 
 An example \langname program is provided in Appendix~\ref{sec:example-cho}.
 \todo{A BNF for \langname.}
+
+\begin{figure}[tbhp]
+  \begin{mdframed}
+      \begin{lstlisting}[basicstyle=\ttfamily]
+            a,...   :=  a | a, a,...
+party | var | func  :=  regex("[a-zA-Z_][a-z0-9_]*")
+               bit  :=  0 | 1
+              expr  :=  bit | var | !expr | expr + expr | expr ^ expr
+            branch  :=  var | obliv
+             obliv  :=  [branch, branch]?var
+             bound  :=  expr | SECRET @party | FLIP @party
+                         | OBLIVIOUSLY obliv FOR party,...
+              parg  :=  party() | party(var,...)
+              getv  :=  var = var
+              gets  :=  () | (getv,...)
+             stmnt  :=  var = bound | SEND var TO parties | OUTPUT var
+                         | MACRO func(parg,...) AS .CHO ENDMACRO
+                         | DO func(parg,...) GET gets
+              .CHO  :=  stmnt;...
+      \end{lstlisting}
+  \end{mdframed}
+  %\newcommand{\gsize}{.38\textwidth}
+  \caption{Syntax of the \langname language.
+      Aliases (\eg \texttt{true} meaning \texttt{1})
+      are omitted.}
+  \label{fig:cho-bnf}
+\end{figure}
+
+\begin{figure}[tbhp]
+  \begin{mdframed}
+      \begin{lstlisting}[language=cho]
+-- Read Secrets
+c_in = SECRET @C
+h_in = SECRET @H
+
+-- Functions
+MACRO sendinverse(P1(a), P2()) AS
+  na = NOT a ^ 1 + 0
+  SEND na TO P2
+ENDMACRO
+
+-- C acts once
+DO sendinverse(C(c_in), H()) GET (c_out = na)
+OUTPUT c_out
+
+-- H acts twice
+DO sendinverse(H(h_in), C()) GET (h_out1 = na)
+OUTPUT h_out1
+DO sendinverse(H(h_in), C()) GET (h_out2 = na)
+OUTPUT h_out2
+      \end{lstlisting}
+  \end{mdframed}
+  %\newcommand{\gsize}{.38\textwidth}
+  \caption{An example \langname program.}
+  \label{fig:example-cho}
+\end{figure}
 
 \section{Evaluation: Bug-Finding in Generated Protocols}
 \label{sec:random-protocols}
@@ -883,7 +1104,7 @@ The primary computational cost of \toolname is the time taken to train the decis
 The results of these experiments suggest that \toolname scales linearly with protocol size and test power, and is capable of detecting bugs in both randomly-generated and real-world protocols. The test typically runs in just seconds to minutes. The results of our experiment on protocol mutations show that \toolname is effective for detecting important classes of security bugs, but that care must be taken in interpreting the results.
 
 For security bugs that directly reveal sensitive information (\eg \textbf{biased sharing} bugs) \toolname is particularly effective. Our results suggest that \toolname is capable of detecting these accidental disclosures even at low test powers and in the context of large protocols.
-
+ 
 \toolname is less effective for security bugs that require significant ``backwards computation'' to leverage the leaked information (\eg \textbf{accidental gate} bugs), since decision trees are not well-suited to solving this problem. A more sophisticated model---such as a deep neural network---may be able to perform this kind of computation, but would take significantly longer to train.
 
 

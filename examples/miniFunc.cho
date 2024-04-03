@@ -4,7 +4,7 @@ h_in = SECRET @H
 
 -- Functions
 MACRO sendinverse(P1(a), P2()) AS
-  na = a XOR 1
+  na = NOT a
   SEND na TO P2
 ENDMACRO
 

@@ -4,7 +4,8 @@
 %% When submitting camera ready or to TAPS, please change the command
 %% to \documentclass[sigconf]{acmart} or whichever template is required
 %% for your publication.
-\documentclass[acmlarge, manuscript, screen, review, anonymous]{acmart}
+% table is there because https://tex.stackexchange.com/a/83102 said so.
+\documentclass[acmlarge, manuscript, screen, review, anonymous, table]{acmart}
 
 %% \BibTeX command to typeset BibTeX logo in the docs
 \AtBeginDocument{%
@@ -111,12 +112,19 @@
 \newcommand{\bigpar}[1]{\left( #1 \right)}
 \newcommand{\eg}{\textit{e.g.}\xspace}
 \newcommand{\github}{\ifanonymous redacted for anonymous submission\else https://github.com/ShapeOfMatter/dt-sim\fi}
+\newcommand{\icONE}[1][cho]{\inlinecode[#1]{1}}
+\newcommand{\iczed}[1][cho]{\inlinecode[#1]{0}}
 \newcommand{\ie}{\textit{i.e.}\xspace}
 \newcommand{\inlinecode}[2][cho]{\lstinline[language=#1]{#2}}
 \newcommand{\langname}{\textsc{\textbf{.}CHO}\xspace}
 \newcommand{\negquad}{\!\!\!\!}
+\newcommand{\STAB}[1]{\begin{tabular}{@{}c@{}}#1\end{tabular}} % https://tex.stackexchange.com/a/416169
 \newcommand{\toolname}{\textsc{DT-SIM}\xspace}
 \newcommand{\vertvec}[1]{\left\langle { \renewcommand*{\arraystretch}{1}\begin{matrix} #1 \end{matrix} } \right\rangle}
+
+\definecolor{ideal}{rgb}{ 0.8, 1.0, 0.8}
+\definecolor{real}{rgb}{  0.8, 0.8, 0.8}
+\definecolor{secret}{rgb}{1.0, 0.8, 0.8}
 
 \newcommand{\mynote}[2]
     {{\color{red} \fbox{\bfseries\sffamily\scriptsize#1}
@@ -287,12 +295,12 @@ but techniques have been found to improve performance somewhat.
 The traditional expression of MPC assumes a pre-determined function $F$, the \emph{functionality},
 mapping the tuple of all participants' input vectors to the respective tuple of output vectors
 (or to distributions of outputs, if $F$ is non-deterministic).
-For example, the protocol in Figure~\ref{fig:example-vac-secure} implements the following function:
+For example, Protocol~\ref{fig:example-vac-secure} implements the following function:
 $$F_3\bigpar{\vertvec{\mathtt{sec}}, \vertvec{\mathtt{pub}}}
   := \bigpar{\vertvec{\mathtt{sec} \neq \mathtt{pub}}, \vertvec{\mathtt{sec} \neq \mathtt{pub}}}$$
 In an \termOfArt{ideal world}, a trusted third party (the \termOfArt{ideal functionality}) would accept input messages
 from all other parties, compute $F$, and then send the parties their respective outputs.
-The ideal functionality implemented by the protocol in in Figure~\ref{fig:example-insecure}
+The ideal functionality implemented by Protocol~\ref{fig:example-insecure}
 could be reasonably implemented by just declaring a coin from someone's pocket to be the \textit{"trusted third party"},
 and ascribing \inlinecode{true} and \inlinecode{false} to heads and tails.
 A \termOfArt{real world} protocol $Π$ is said to \emph{correctly} implement $F$ if, for all possible inputs,
@@ -300,11 +308,11 @@ $Π$ results in all parties getting the same outputs as they would have in the i
 The \emph{security} of $Π$ is expressed in terms of a particular threat model and the participants' \textit{"views"}.
 The \termOfArt{ideal world view}, $\mathsf{Ideal}_P(F,\vec{x})$, of a party $P$ is what it sees when running $F$ in the ideal world:
 just its inputs $\vec{x}_P$ and its outputs $\vec{y}_P$.
-For example, \inlinecode{C}'s ideal world view of an execution of the protocol in Figure~\ref{fig:example-vac-protocol}
+For example, \inlinecode{C}'s ideal world view of an execution of Protocol~\ref{fig:example-vac-protocol}
 would be a single random bit, the value of \inlinecode{x} in that execution.
 The \termOfArt{real world view}, $\mathsf{Real}_P(Π, \vec{x})$, of a party $P$ is everything it sees while executing its part of $Π$ in the real world:
 its inputs, outputs, all messages it receives, and all the bits of random tape it uses.
-Continuing the example of Figure~\ref{fig:example-vac-protocol}, \inlinecode{C}'s real world view would additionally contain
+Continuing the example of Protocol~\ref{fig:example-vac-protocol}, \inlinecode{C}'s real world view would additionally contain
 the (independent) random value \inlinecode{_un}
 (and technically a duplicate of \inlinecode{x}, because it's both output and a received message).
 Both kinds of views extend naturally to lists of parties.
@@ -314,7 +322,7 @@ Both kinds of views extend naturally to lists of parties.
       \lstinputlisting[language=cho]{insecure.cho}
   \end{mdframed}
   %\newcommand{\gsize}{.38\textwidth}
-  \caption{An example protocol written in \langname.
+    \caption{An example protocol, Protocol~\ref{fig:example-insecure}, written in \langname.
     This protocol does \emph{not} demonstrate MPC security.
     It's ideal functionality is \textit{"flip a coin"},
     because the one-bit output is uniformly distributed regardless of anyone's \inlinecode{SECRET}s.}
@@ -325,7 +333,7 @@ Both kinds of views extend naturally to lists of parties.
       \lstinputlisting[language=cho]{vac_protocol.cho}
   \end{mdframed}
   %\newcommand{\gsize}{.38\textwidth}
-  \caption{An example protocol written in \langname.
+  \caption{An example protocol, Protocol~\ref{fig:example-vac-protocol}, written in \langname.
     This protocol \emph{does} demonstrate MPC security, although it's ideal functionality is just \textit{"flip a coin"}.}
   \label{fig:example-vac-protocol}
 \end{figure}
@@ -334,106 +342,13 @@ Both kinds of views extend naturally to lists of parties.
       \lstinputlisting[language=cho]{vac_secure.cho}
   \end{mdframed}
   %\newcommand{\gsize}{.38\textwidth}
-  \caption{An example protocol written in \langname.
+  \caption{An example protocol, Protocol~\ref{fig:example-vac-secure} written in \langname.
     This protocol \emph{does} demonstrate MPC security,
     although such security is vacuous because \inlinecode{C} could compute \inlinecode{H}'s \inlinecode{SECRET}
     from the ideal functionality: \textit{"return the xor of the secret and public values"}.}
   \label{fig:example-vac-secure}
 \end{figure}
 
-\begin{table}
-  \centering
-  \renewcommand*{\arraystretch}{2}
-  \begin{tabular}{| c c c c |}
-    \hline
-      \textbf{Ideal Functionality} & \textbf{Implementation} & \textbf{MPC Secure?} & \\
-      \hdashline
-      \multicolumn{2}{| c}{\textit{Ideal World Views}} & \multicolumn{2}{c |}{\textit{Real World Views}}  \\
-    \hline
-      $\mathsf{PMF}\big[F_1(\mathtt{sec})\big] := \mathsf{u}(\mathtt{0}, \mathtt{1})$ &
-        Figure~\ref{fig:example-insecure} &
-        No &
-        \\\hdashline
-        \multicolumn{2}{| c}{\begin{tabular}{l l}
-            $\mathsf{Ideal}_\mathtt{C}\bigpar{F_1,\vertvec{\mathtt{sec}:\mathtt{0}}}$ & \negquad\!\!\! $\leftsquigarrow
-             \mathsf{u}\bigpar{\vertvec{ \mathtt{x}:\mathtt{0} }, \vertvec{ \mathtt{x}:\mathtt{1} }}$ \\
-            $\mathsf{Ideal}_\mathtt{C}\bigpar{F_1, \vertvec{ \mathtt{sec}:\mathtt{1} }}$ & \negquad\!\!\! $\leftsquigarrow
-             \mathsf{u}\bigpar{\vertvec{ \mathtt{x}:\mathtt{0} }, \vertvec{ \mathtt{x}:\mathtt{1} }}$
-        \end{tabular}} &
-        \multicolumn{2}{c |}{\begin{tabular}{l l}
-            $\mathsf{Real}_\mathtt{C}\bigpar{F_1, \vertvec{ \mathtt{sec}:\mathtt{0} }}$ & \negquad\!\!\! $\leftsquigarrow
-             \mathsf{u}\bigpar{\vertvec{ \mathtt{flp}:\mathtt{0} \\ \mathtt{x}:\mathtt{0} },
-                               \vertvec{ \mathtt{flp}:\mathtt{1} \\ \mathtt{x}:\mathtt{1} }}$ \\
-            $\mathsf{Real}_\mathtt{C}\bigpar{F_1, \vertvec{ \mathtt{sec}:\mathtt{1} }}$ & \negquad\!\!\! $\leftsquigarrow
-             \mathsf{u}\bigpar{\vertvec{\mathtt{flp}:\mathtt{0} \\ \mathtt{x}:\mathtt{1}},
-                               \vertvec{\mathtt{flp}:\mathtt{1} \\ \mathtt{x}:\mathtt{0}}}$
-        \end{tabular}}
-        \\
-      \hline
-      $\mathsf{PMF}\big[F_2(\mathtt{sec})\big] := \mathsf{u}(\mathtt{0}, \mathtt{1})$ &
-        Figure~\ref{fig:example-vac-protocol} &
-        Yes &
-        \\\hdashline
-        \multicolumn{2}{| c}{\begin{tabular}{l l}
-            $\mathsf{Ideal}_\mathtt{C}\bigpar{F_2,\vertvec{\mathtt{sec}:\mathtt{0}}}$ & \negquad\!\!\! $\leftsquigarrow
-             \mathsf{u}\bigpar{\vertvec{ \mathtt{x}:\mathtt{0} }, \vertvec{ \mathtt{x}:\mathtt{1} }}$ \\
-            $\mathsf{Ideal}_\mathtt{C}\bigpar{F_2, \vertvec{ \mathtt{sec}:\mathtt{1} }}$ & \negquad\!\!\! $\leftsquigarrow
-             \mathsf{u}\bigpar{\vertvec{ \mathtt{x}:\mathtt{0} }, \vertvec{ \mathtt{x}:\mathtt{1} }}$
-        \end{tabular}} &
-        \multicolumn{2}{c |}{\begin{tabular}{l l}
-            $\mathsf{Real}_\mathtt{C}\bigpar{F_2, \vertvec{ \mathtt{sec}:\mathtt{0} }}$ & \negquad\!\!\! $\leftsquigarrow
-             \mathsf{u}\bigpar{\vertvec{ \mathtt{\_un}:\mathtt{0} \\ \mathtt{x}:\mathtt{0} },
-                               \vertvec{ \mathtt{\_un}:\mathtt{0} \\ \mathtt{x}:\mathtt{1} },
-                               \vertvec{ \mathtt{\_un}:\mathtt{1} \\ \mathtt{x}:\mathtt{0} },
-                               \vertvec{ \mathtt{\_un}:\mathtt{1} \\ \mathtt{x}:\mathtt{1} }}$ \\
-            $\mathsf{Real}_\mathtt{C}\bigpar{F_2, \vertvec{ \mathtt{sec}:\mathtt{1} }}$ & \negquad\!\!\! $\leftsquigarrow
-             \mathsf{u}\bigpar{\vertvec{ \mathtt{\_un}:\mathtt{0} \\ \mathtt{x}:\mathtt{0} },
-                               \vertvec{ \mathtt{\_un}:\mathtt{0} \\ \mathtt{x}:\mathtt{1} },
-                               \vertvec{ \mathtt{\_un}:\mathtt{1} \\ \mathtt{x}:\mathtt{0} },
-                               \vertvec{ \mathtt{\_un}:\mathtt{1} \\ \mathtt{x}:\mathtt{1} }}$
-        \end{tabular}}
-        \\
-      \hline
-      $F_3(\mathtt{sec}, \mathtt{pub}) := \mathtt{sec} \neq \mathtt{pub}$ &
-        Figure~\ref{fig:example-vac-secure} &
-        Yes &
-        \\\hdashline
-        \multicolumn{2}{| c}{\begin{tabular}{l l}
-            $\mathsf{Ideal}_\mathtt{C}\bigpar{F_3,\vertvec{ \mathtt{sec}:\mathtt{0} \\ \mathtt{pub}:\mathtt{0} }}$ & \negquad\!\!\! $\leftsquigarrow
-             \mathsf{u}\bigpar{\vertvec{ \mathtt{pub}:\mathtt{0} \\ \mathtt{x}:\mathtt{0} }}$ \\
-            $\mathsf{Ideal}_\mathtt{C}\bigpar{F_3,\vertvec{ \mathtt{sec}:\mathtt{0} \\ \mathtt{pub}:\mathtt{1} }}$ & \negquad\!\!\! $\leftsquigarrow
-             \mathsf{u}\bigpar{\vertvec{ \mathtt{pub}:\mathtt{1} \\ \mathtt{x}:\mathtt{1} }}$ \\
-            $\mathsf{Ideal}_\mathtt{C}\bigpar{F_3,\vertvec{ \mathtt{sec}:\mathtt{1} \\ \mathtt{pub}:\mathtt{0} }}$ & \negquad\!\!\! $\leftsquigarrow
-             \mathsf{u}\bigpar{\vertvec{ \mathtt{pub}:\mathtt{0} \\ \mathtt{x}:\mathtt{1} }}$ \\
-            $\mathsf{Ideal}_\mathtt{C}\bigpar{F_3,\vertvec{ \mathtt{sec}:\mathtt{1} \\ \mathtt{pub}:\mathtt{1} }}$ & \negquad\!\!\! $\leftsquigarrow
-             \mathsf{u}\bigpar{\vertvec{ \mathtt{pub}:\mathtt{1} \\ \mathtt{x}:\mathtt{0} }}$ \\
-        \end{tabular}} &
-        \multicolumn{2}{c |}{\begin{tabular}{l l}
-            $\mathsf{Real}_\mathtt{C}\bigpar{F_3, \vertvec{ \mathtt{sec}:\mathtt{0} \\ \mathtt{pub}:\mathtt{0} }}$ & \negquad\!\!\! $\leftsquigarrow
-             \mathsf{u}\bigpar{\vertvec{ \mathtt{pub}:\mathtt{0} \\ \mathtt{x}:\mathtt{0} }}$ \\
-            $\mathsf{Real}_\mathtt{C}\bigpar{F_3, \vertvec{ \mathtt{sec}:\mathtt{0} \\ \mathtt{pub}:\mathtt{1} }}$ & \negquad\!\!\! $\leftsquigarrow
-             \mathsf{u}\bigpar{\vertvec{ \mathtt{pub}:\mathtt{1} \\ \mathtt{x}:\mathtt{1} }}$ \\
-            $\mathsf{Real}_\mathtt{C}\bigpar{F_3, \vertvec{ \mathtt{sec}:\mathtt{1} \\ \mathtt{pub}:\mathtt{0} }}$ & \negquad\!\!\! $\leftsquigarrow
-             \mathsf{u}\bigpar{\vertvec{ \mathtt{pub}:\mathtt{0} \\ \mathtt{x}:\mathtt{1} }}$ \\
-            $\mathsf{Real}_\mathtt{C}\bigpar{F_3, \vertvec{ \mathtt{sec}:\mathtt{1} \\ \mathtt{pub}:\mathtt{1} }}$ & \negquad\!\!\! $\leftsquigarrow
-             \mathsf{u}\bigpar{\vertvec{ \mathtt{pub}:\mathtt{1} \\ \mathtt{x}:\mathtt{0} }}$ \\
-        \end{tabular}}
-        \\
-    \hline
-  \end{tabular}
-  \bigskip
-    \caption{A summary of some introductory examples of protocols.
-    The exact structure with which views are represented is purely a matter of notation;
-    here we use flat vectors of \inlinecode{variable:value} bindings,
-    and we omit duplicates.
-    We denote a uniform distribution across a finite list as $\mathsf{u}(\dots)$,
-    and $\leftsquigarrow$ denotes sampling.
-    \inlinecode{0} and \inlinecode{1} are synonymous with \inlinecode{false} and \inlinecode{true} respectively.
-    Since $F_3$ is deterministic, we define it directly as a function instead of a Probability Mass Function ($\mathsf{PMF}$);
-    that \inlinecode{C}'s views of its implementation happen to also be deterministic is incidental.}
-  \label{tbl:examples}
-\end{table}
-%}
 
 
 \termOfArt{Passive security}
@@ -513,11 +428,11 @@ A \termOfArt{vacuous protocol}\footnote{
     This terminology is new; we needed it to talk though problems we encountered in during this project.
 }, one in which no information (random bits don't count) is communicated, is automatically secure.
 (Of course the functionality implemented by a vacuous protocol will be trivial.
-For example consider the protocol in Figure~\ref{fig:example-vac-protocol}.)
+For example consider Protocol~\ref{fig:example-vac-protocol}.)
 On the other hand, if the ideal-world adversary can efficiently deduce a unique possible honest input upon observing the corrupt output,
 then the protocol is \termOfArt{vacuously secure}:
 any \emph{correct} implementation of that functionality is \emph{secure} regardless of what's communicated.
-For example the protocol in Figure~\ref{fig:example-vac-secure} is vacuously secure,
+For example Protocol~\ref{fig:example-vac-secure} is vacuously secure,
 and could even be amended to send \inlinecode{sec} itself and still be secure.
 These extremes mark the ends of a spectrum; most protocols are somewhere in the middle,
 where learning the output focuses the corrupt party's distribution-estimate of the honest secrets but still leaves some uncertainty.
@@ -607,7 +522,7 @@ then the conditional independence property likely does not hold.
 \paragraph{Choice of classifiers}
 We follow the lead of \cite{chalupka2018fast} by using decision trees (D-Trees) as our ML classifiers in \toolname.
 In principal, \emph{any} ML classifier would be legitimate to use;
-the choice an engineering judgment.
+the choice is an engineering judgment.
 Because the process requires training many copies of the model, a light-weight model like a D-Tree is preferable.
 An individual neural-net might be better able to find subtle patterns in its training data,
 but for a given compute budget one would be able to train fewer of them or train them on less data.
@@ -616,27 +531,101 @@ and the amount of data they're trained on,
 and that even with a light-weight model like a D-Tree more data is consumed in training than in testing.
 
 \subsection{The \toolname Algorithm}\label{sec:algorithm}
-If a simulator $\mathtt{SIM}$ exists for a protocol $Π$ implementing functionality $F$,
+If a simulator $\mathtt{SIM}$ exists for a protocol $Π$ implementing functionality $F$ (thus implying $Π$ is secure),
 and we suppose fixed corrupt-party inputs $\vec{x}_C$,
 then for any observed output $\vec{y}_C$ the values yielded by $\mathtt{SIM}(\vec{x}_C, \vec{y}_C)$
 will be drawn from the same distribution regardless which of the consistent honest inputs $\vec{x}_H$ were actually used.
-This is conditional independence, and since we assume the simulator is correct ($Π$ is secure),
+This is conditional independence, and since we assumed $Π$ is secure,
 we have that independence between the honest secrets and the corrupt real-world views conditional on the corrupt ideal-world views
 is a requisite feature of MPC security.
 In other words
 %
 $$
-\bigpar{ \vec{y}_H \centernot{⫫} \mathsf{Real}_C\bigpar{Π, \vec{x}} \mid \mathsf{Ideal}_C\bigpar{F,\vec{x}} }
+\bigpar{ \vec{x}_H \centernot{⫫} \mathsf{Real}_C\bigpar{Π, \vec{x}} \mid \mathsf{Ideal}_C\bigpar{F,\vec{x}} }
 \rightarrow
 \nexists \; \mathtt{SIM}
 $$
 %
+For example, in Figure~\ref{fig:views}a,
+$\vec{x}_C$ is empty, $\vec{x}_H$ is the single bit \inlinecode{h_sec}, and $\vec{y}_C$ is the single bit \inlinecode{i_x},
+therefore
+\begin{align*}
+    \mathsf{Ideal}_C\bigpar{F_1, \langle\text{\inlinecode{h_sec}}\rangle} =& \langle\text{\inlinecode{i_x}}\rangle \\
+    \mathsf{Real}_C\bigpar{\text{Protocol~\ref{fig:example-insecure}}, \langle\text{\inlinecode{h_sec}}\rangle}
+      =& \langle \text{\inlinecode{i_x}}, \text{\inlinecode{v_flp_1}}, \text{\inlinecode{v_x_1}} \rangle
+\end{align*}
+If we condition on an observation of \inlinecode{i_x = 1}, then
+$\text{\inlinecode{h_sec}} \centernot{⫫} \text{\inlinecode{v_flp_1}}$;
+each uniquely determines the other.
+Thus we know that no simulator \emph{could possibly} exist.
+In contrast, in Figures~\ref{fig:views}b and~\ref{fig:views}c we do observe conditional independence:
+In the case of Figure~\ref{fig:views}b, for either possible ideal world view,
+all combinations of \inlinecode{v__un_1} and \inlinecode{h_sec} are possible.
+In the case of Figure~\ref{fig:views}c, observing the ideal world view uniquely identifies \emph{both} the real world view and the honest secret.
+The view data for any useful MPC protocol would be much higher-dimension than these examples, we examine such a case in Appendix~\ref{sec:example-big}.
+
 We use the techniques from Chalupka et al.~\cite{chalupka2018fast} to build \toolname,
 which directly tests for the above conditional dependence.
 \toolname tests actual programs;
-assuming the program correctly implements its intended functionality
-and that \toolname is configured with sufficient power for the target program,
-\toolname can identify a program as not MPC secure.
+an \texttt{INSECURE} result from \toolname is strong evidence that the program does not have MPC security.
+
+\begin{figure}[tbhp]
+  \centering
+  %\renewcommand*{\arraystretch}{2}
+    \begin{tabular}{c c c}\hspace{-7pt}
+    \begin{tabular}[b]{| >{\columncolor{ideal}}c >{\columncolor{real}}c >{\columncolor{real}}c >{\columncolor{secret}}c |}
+    \hline
+        \inlinecode{i_x},& \inlinecode{v_flp_1},& \inlinecode{v_x_1},& \inlinecode{h_sec} \\
+    \hline
+        \iczed,&           \iczed,&               \iczed,&             \iczed\\
+        \icONE,&           \icONE,&               \icONE,&             \iczed\\
+        \icONE,&           \iczed,&               \icONE,&             \icONE\\
+        \iczed,&           \icONE,&               \iczed,&             \icONE\\
+    \hline
+        \multicolumn{4}{c}{\textit{(a.)} Protocol~\ref{fig:example-insecure}}
+    \end{tabular}
+    &
+    \begin{tabular}[b]{| >{\columncolor{ideal}}c >{\columncolor{real}}c >{\columncolor{real}}c >{\columncolor{secret}}c |}
+    \hline
+        \inlinecode{i_x},& \inlinecode{v__un_1},& \inlinecode{v_x_1},& \inlinecode{h_sec} \\
+    \hline
+        \iczed,&           \iczed,&           \iczed,&           \iczed\\
+        \icONE,&           \iczed,&           \icONE,&           \iczed\\
+        \iczed,&           \icONE,&           \iczed,&           \iczed\\
+        \icONE,&           \icONE,&           \icONE,&           \iczed\\
+        \icONE,&           \iczed,&           \icONE,&           \icONE\\
+        \iczed,&           \iczed,&           \iczed,&           \icONE\\
+        \icONE,&           \icONE,&           \icONE,&           \icONE\\
+        \iczed,&           \icONE,&           \iczed,&           \icONE\\
+    \hline
+        \multicolumn{4}{c}{\textit{(b.)} Protocol~\ref{fig:example-vac-protocol}}
+    \end{tabular}
+    &
+    \begin{tabular}[b]{| >{\columncolor{ideal}}c >{\columncolor{ideal}}c >{\columncolor{real}}c >{\columncolor{secret}}c |}
+    \hline
+        \inlinecode{i_x},& \inlinecode{i_pub},& \inlinecode{v_x_1},& \inlinecode{h_sec} \\
+    \hline
+        \iczed,&           \iczed,&               \iczed,&             \iczed\\
+        \icONE,&           \icONE,&               \icONE,&             \iczed\\
+        \icONE,&           \iczed,&               \icONE,&             \icONE\\
+        \iczed,&           \icONE,&               \iczed,&             \icONE\\
+    \hline
+        \multicolumn{4}{c}{\textit{(c.)} Protocol~\ref{fig:example-vac-secure}}
+    \end{tabular}
+  \end{tabular}
+    \caption{View data from the example \langname protocols in
+    Figures~\ref{fig:example-insecure},~\ref{fig:example-vac-protocol}, and~\ref{fig:example-vac-secure}.
+    \toolname ingests CSV files like this, with variable names from the \langname code annotated to indicate their role.
+    The \inlinecode{i_} prefix indicates that a value is part of the ideal world view; such values are also included in the real world view.
+    A \inlinecode{v_} prefix indicates that the value is in the real world view but not the ideal world view.
+    The honest secrets are prefixed with \inlinecode{h_}; these do not appear in any of \inlinecode{C}'s views,
+    but are used as the "labels" during ML training and testing.
+    Note that in these examples \inlinecode{x} is duplicated because it's both a message received and an \inlinecode{OUTPUT}.
+    In Protocol~\ref{fig:example-vac-protocol}, the variable \inlinecode{flp} is not included at all.
+    For each of these examples we include here a view row for each possible execution trace;
+    \toolname assumes that the data it ingests is randomly sampled.}
+  \label{fig:views}
+\end{figure}
 
 To test a protocol, \toolname uses pairs of D-Trees to predict the honest secrets based on the corrupt views.
 One of each pair has access to the real-world views, and the other only has access to the ideal-world views.
@@ -677,53 +666,92 @@ In principal the only aspect of MPC (in)security that conditional (in)dependence
 is the constraint on a hypothetical adversary's computational power.
 In other words, a protocol may truly have the appropriate conditional independence,
 but still be insecure because access to the real-world views allows an adversary to compute in polynomial-time
-something that would require super-polynomial-time in the ideal world.
+something that would require super-polynomial-time in the ideal world
+(Figure~\ref{fig:interpretation}d2).
 We believe this to be a much smaller concern in practice than the statistical limitations of independence testing.
+Figure~\ref{fig:interpretation} schematizes the different causes of different outcomes for \toolname.
+\footnote{We avoid the vocabulary of \emph{"false positives"} and \emph{"false negatives"},
+because keeping track of the layered polarities of the situation is a source of confusion.}
+
+\begin{figure}[tbhp]
+  \renewcommand*{\arraystretch}{1.2}
+  \begin{tabular}{| r c c |}
+      \hline
+      & \multicolumn{2}{c|}{\textit{If \toolname reports \dots then it can mean \dots}}\\
+      & \texttt{INSECURE} & \texttt{MAYBE SECURE} \\
+      \hline
+      \multirow{2}{*}{\STAB{\rotatebox[origin=c]{90}{\textit{\quad the protocol is secure and \dots \quad}}}}
+        & \begin{minipage}[t][11em][c]{0.45\textwidth}
+            \textit{(1.)}\; it was randomly flagged as insecure. The prior for this happening is at most $\alpha$.
+            $$or$$
+            \textit{(2.)}\; it looks insecure because it's \emph{easier} to infer the honest secrets from the real world views
+                than from the ideal world views.
+                This is most likely to happen when a vacuously secure protocol
+                contains errors that would violate security for a different functionality.
+        \end{minipage}
+        & \begin{minipage}[t][11em][c]{0.45\textwidth}
+            $$\text{this is good!}$$
+        \end{minipage}
+        \\
+      & \textit{(a.)} & \textit{(b.)} \\
+      \hline
+      \multirow{2}{*}{\STAB{\rotatebox[origin=c]{90}{\textit{\quad the protocol is insecure and \dots \quad}}}}
+        & \begin{minipage}[t][11em][c]{0.45\textwidth}
+            $$\text{\toolname is correctly detecting the insecurity.}$$
+        \end{minipage}
+        & \begin{minipage}[t][11em][c]{0.45\textwidth}
+            \textit{(1.)}\; insufficient data was used during the test for the insecurity to be detected.
+            $$or$$
+            \textit{(2.)}\; the nature of the insecurity is not captured by the conditional independence test.
+        \end{minipage}
+        \\
+      & \textit{(c.)} & \textit{(d.)} \\
+      \hline
+  \end{tabular}
+  \caption{Interpretations of test results that should be considered after running \toolname.}
+  \label{fig:interpretation}
+\end{figure}
 
 The usual trade-offs of significance testing apply.
-Setting $\alpha$ too low will cause programs whose insecure-ness is only marginally discernible to the D-Trees
-to pass the test.
-Setting $\alpha$ higher will compromise one's certainty that a failing program truly is insecure.
-There are three reasons why this is not a serious problem with \toolname, each worth considering as its own subtlety.
-
-First, if \toolname returns \texttt{INSECURE},
+Setting $\alpha$ too low will drive up the amount of data that needs to be used to reliably detect insecurity,
+increasing the odds of the situation in Figure~\ref{fig:interpretation}d1.
+Setting $\alpha$ too high will compromise one's certainty that a failing program truly is insecure,
+because $\alpha$ upper-bounds the odds of Figure~\ref{fig:interpretation}a1.
+Conventional choices of $0.01 \le \alpha \le 0.05$ are appropriate for \toolname.
+If \toolname returns \texttt{INSECURE},
 then there's nothing wrong with running it again to see if you were just unlucky.
-This assumes that you have the resources (\eg compute time) to do so, which you might not.
+(This assumes that you have the resources to do so.
 Since more powerful tests are better able to detect problems,
-if your compute-budget is fixed you're better off spending it all on a single bigger test.
+if your compute-budget is fixed you're better off spending it all on a single bigger test.)
 
-Second, we observe that the transition of an insecure program between "appears secure" and "appears insecure"
-as the power of the test increases is sharp,
-and as the size of the test continues to increase the $p$-values quickly drop below any reasonable $\alpha$.
-This can be frustrating; if you're unsure of the security of a protocol
-then there's always a chance a modestly-more-powerful test might be conclusive.
-On the other hand, it means that at any reasonable fixed test-size,
-most of the protocols \toolname \emph{can} detect insecure will be \emph{unambiguously} insecure.
-
-The third such mitigating factor is also a problem on its own.
 For a secure program the observed $p$-values
-will typically \emph{not} be sampled from the uniform distribution on $\mathbb{R}_{(0,1]}$,
-and $\alpha$ is actually an \emph{upper bound} on the likelyhood of falsely flagging a protocol as insecure.
+will typically \emph{not} be sampled from the uniform distribution on $\mathbb{R}_{(0,1]}$;
+$\alpha$ is actually an \emph{upper bound} on the likelihood of falsely flagging a protocol as insecure.
 Contrary to casual descriptions of significance testing, this is not a problem with the statistics;
 it's a result of the inequality in the testing hypothesis.\footnote{
     Significance testing of an \emph{equality} based null-hypothesis would yield uniformly distributed $p$-values when the null-hypothesis is true.
 }
-Because the ML models have no knowlege of the importance or semantics of the bits they're trained on,
+That said, it does present a challenge:
+Because the ML models have no knowledge of the importance or semantics of the bits they're trained on,
 the (mostly random) message- and tape-data provided to the real-world models makes it harder for them
 to learn from the input- and output-data they share with the ideal-world models.
-In other words, the additional data on which the real-world models are trained is fundementally a hindrance to them,
-and only becomes advantageous if the protocol is "insecure enough" to overcome this hidrance.
+In other words, the additional data on which the real-world models are trained is fundamentally a hindrance to them,
+and only becomes advantageous if the protocol is "insecure enough" to overcome this hindrance.
 A protocol might be truly insecure and not have the relevant conditional independence,
 but still appear secure because the advantage an adversary could gain at guessing the honest inputs
 is smaller than the advantage the ideal-world ML models gain from their more focused data.
-This issue could be overcome by setting \texttt{trainN} sufficiently high;
+This is a major contributing factor to the possibility of Figure~\ref{fig:interpretation}d1,
+but it also means that the Figure~\ref{fig:interpretation}a2 is unlikely to happen to a correctly implemented protocol.
+The possibility of Figure~\ref{fig:interpretation}d1 can always be mitigated by using more data,
+although no practical means exist for saying how much would be enough.
+In particular, as \texttt{trainN} increases,
 the ideal-world models' scores will saturate before the real-world models' do.
 
-One might fix the above problem by padding the ideal-world views with random noise out to the same width as the real-world views.
-In our experiments this introduced an even worse problem.
+It's tempting to fix the above problem by padding the ideal-world views with random noise out to the same width as the real-world views,
+but in our experiments this introduced an even worse problem.
 The additional data afforded to the real-world models is not fully random;
 the whole view is self-consistent per the semantics of the protocol.
-Therefore, the uniformly-random padding given to the ideal-world model will be "heavier" than what it's supposed to be balancing,
+Therefore, any uniformly-random padding given to the ideal-world model will be "heavier" than what it's supposed to be balancing,
 invalidating a key assumption of the whole test:
 that any advantage of the real-world models comes from insecurity in the protocol.
 
@@ -773,7 +801,7 @@ Oblivious transfer (OT)~\cite{kilian1988founding} is a 2-party protocol that all
 %
 Oblivious transfer is a building block for many other protocols, including the GMW protocol described later.
 
-An example \langname program is provided in Appendix~\ref{sec:example-cho}.
+An example \langname program is provided in Appendix~\ref{sec:example-big}.
 \todo{A BNF for \langname.}
 
 \begin{figure}[tbhp]
@@ -1251,7 +1279,7 @@ This Appendix contains additional experimental results excluded from the main bo
 
 \input{full_figures.tex}
 
-\section{Example \langname program}\label{sec:example-cho}
+\section{Example \langname program}\label{sec:example-big}
 
 The following \langname uses oblivious-transfer based GMW to evaluate a circuit representing a "less than" function
 between the two parties' inputs, interpreted as 2-bit binary numbers.

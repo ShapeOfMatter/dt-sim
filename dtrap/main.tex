@@ -112,6 +112,7 @@
 \newcommand{\bigpar}[1]{\left( #1 \right)}
 \newcommand{\eg}{\textit{e.g.}\xspace}
 \newcommand{\github}{\ifanonymous redacted for anonymous submission\else https://github.com/ShapeOfMatter/dt-sim\fi}
+\newcommand{\highlight}[2]{\colorbox{#1}{#2}}
 \newcommand{\icONE}[1][cho]{\inlinecode[#1]{1}}
 \newcommand{\iczed}[1][cho]{\inlinecode[#1]{0}}
 \newcommand{\ie}{\textit{i.e.}\xspace}
@@ -125,6 +126,10 @@
 \definecolor{ideal}{rgb}{ 0.8, 1.0, 0.8}
 \definecolor{real}{rgb}{  0.8, 0.8, 0.8}
 \definecolor{secret}{rgb}{1.0, 0.8, 0.8}
+\definecolor{nullmutation}{gray}{0.85}
+\definecolor{insecmutation}{gray}{1.00}
+\definecolor{correct}{rgb}{  0.80, 1.00, 0.85}
+\definecolor{incorrect}{rgb}{1.00, 0.80, 0.85}
 
 \newcommand{\mynote}[2]
     {{\color{red} \fbox{\bfseries\sffamily\scriptsize#1}
@@ -757,7 +762,8 @@ that any advantage of the real-world models comes from insecurity in the protoco
 
 \subsection{Implementation}
 
-Our \toolname Python script consumes a stream of fixed-length bit vectors as a CSV.
+Our \toolname Python script consumes a stream of fixed-length bit vectors as a CSV,
+as shown in Figure~\ref{fig:views}.
 Annotation of which columns are available in the real and ideal worlds is provided in the header.
 The CSV is parsed and broken up as needed as a \texttt{pandas} dataframe.
 The individual ML models are instances of \texttt{sklearn.tree.DecisionTreeClassifier},
@@ -765,6 +771,16 @@ and they're trained in parallel with \texttt{joblib.Parallel}.
 The D-Tree scores are inflated by $+1 \cdot 10^{-10}$ to avoid division-by-zero in the score-ratio,
 and the score distributions are compared by \texttt{scipy.stats.wilcoxon}.
 
+The use of the \langname language (Section~\ref{sec:cho-lang}) to express the system being tested is not strictly necessary;
+\toolname will work on any data that's correctly formatted and correctly generated.
+In addition to getting the column's labeled correctly, \langname performs a few important tasks:
+\begin{itemize}
+    \item It efficiently generates large batches of trace data.
+    \item It \emph{detects} what runtime-variables need to be included in the views.
+        (Exactly which parties are corrupt is a parameter of the data-generation semantics.)
+    \item The generated trace rows are uniformly sampled from all possible traces,
+        \ie all parties' random tapes \emph{and} secret inputs are randomly generated.
+\end{itemize}
 Our implementation and the code to reproduce our experimental evaluation are available as open-source.\footnote{\github}
 
 \subsection{Evaluation}\label{sec:evaluation}
@@ -790,19 +806,24 @@ To facilitate analysis of \toolname, we implemented a choreographic programming 
 with surrounding tooling to support large batches of parallel evaluations of a single program and piping of the generated data.
 (In particular, the semantics are polymorphic within the Haskell type-class \texttt{Data.Bits.FiniteBits},
 \eg sixty four evaluations can run in a single thread by applying the semantics to the \texttt{Word64} type.)
+
+\langname's syntax is shown in Figure~\ref{fig:cho-bnf}.
 The design of \langname is driven by the contextual assumptions of MPC security.
 In addition to bit-level computations and transmission of single bits between arbitrary parties,
 each party has its own read-only tapes for secret inputs and randomness,
 and its own tape for output bits.
 \langname supports macros, but they are extremely limited.
+\langname has no explicit type system, but the parser as-implemented will reject non-executable protocols.
 
 \langname supports 1-of-N oblivious transfer as a primitive operation.
 Oblivious transfer (OT)~\cite{kilian1988founding} is a 2-party protocol that allows one party ($R$, the \emph{receiver}) to select one out of several secret inputs provided by the other party ($S$, the \emph{sender}). In 1-out-of-2 OT, $S$ provides 2 secret inputs $x_0$ and $x_1$ and $R$ provides a secret \emph{selection bit} $b$. If $b=0$, $R$ receives $x_0$; if $b=1$, $R$ receives $x_1$. $R$ does not learn anything about the not-selected secret, and $S$ does not learn which secret $R$ selected. This idea can be extended to 1-out-of-$n$ OT by extending the selection bit $b$ to a $\log_2(n)$-bit string.
 %
 Oblivious transfer is a building block for many other protocols, including the GMW protocol described later.
 
-An example \langname program is provided in Appendix~\ref{sec:example-big}.
-\todo{A BNF for \langname.}
+Figures~\ref{fig:example-insecure}, \ref{fig:example-vac-protocol}, and~\ref{fig:example-vac-secure} are all written in \langname.
+Figure~\ref{fig:example-cho} is a little larger; note how instead of returning a value,
+macros allow arbitrary variables from their inner scope to be rebound in the calling scope.
+An example of a real MPC protocol written in \langname is provided in Appendix~\ref{sec:example-big}.
 
 \begin{figure}[tbhp]
   \begin{mdframed}
@@ -840,7 +861,7 @@ h_in = SECRET @H
 
 -- Functions
 MACRO sendinverse(P1(a), P2()) AS
-  na = NOT a ^ 1 + 0
+  na = NOT a
   SEND na TO P2
 ENDMACRO
 
@@ -981,31 +1002,40 @@ and present the results in Section~\ref{sec:e2_results}.
 
 For our evaluation, we consider two MPC frameworks for evaluating boolean-arithmetic circuits,
 and instantiate those frameworks with three different functions (represented as circuits) to construct secure protocols.
-The frameworks and functions are listed in Table~\ref{tbl:protocols} and described below.
-All six protocols are designed for two parties,
-with the addition of a third ``dealer'' party to produce correlated randomness in several of the protocols.
+The frameworks and functions are listed in Figure~\ref{fig:protocols} and described below.
+All of these protocols are implemented for two parties,
+with the addition of a third "dealer" party to produce correlated randomness in the Beaver triple framework.
 
-\begin{table}
+\begin{figure}
   \centering
   \renewcommand*{\arraystretch}{1.2}
-  \begin{tabular}{|l l|}
+  \begin{tabular}{|l c c l|}
     \hline
-    \textbf{MPC Frameworks} & \textbf{Approach} \\
+      \textbf{MPC Frameworks} & \multicolumn{3}{l |}{\textbf{Approach}} \\
     \hline
-    GMW~\cite{goldreich2019play, goldreich2009foundations} & Oblivious Transfer\\
-    MPC w/ Beaver Triples~\cite{beaver1992efficient} & Beaver Triples\\[4pt]
+    GMW~\cite{goldreich2019play, goldreich2009foundations}
+      & \multicolumn{3}{l |}{\begin{minipage}[t]{20em}
+      Additively-homomorphic secret sharing, using \textbf{oblivious transfer} for \texttt{AND} gates.\end{minipage}}
+    \\ \multicolumn{4}{|c|}{}\\[-1em]
+    MPC with Beaver Triples~\cite{beaver1992efficient}
+      & \multicolumn{3}{l |}{\begin{minipage}[t]{22em}
+          Additively-homomorphic secret sharing, consuming one \textbf{Beaver triple} for each \texttt{AND} gate.\end{minipage}}
+    \\ \multicolumn{4}{|c|}{}\\[-1em]
     \hline
-    \textbf{Instantiated Functions} & \textbf{Invertibility}\\
+    \multicolumn{4}{c}{}\\[-1em]
     \hline
-    $n$-bit Addition & Complete \\
-    $n$-bit Less-than Comparison & Partial \\
-    Beaver Triple Generation & None \\
+                                      & \textbf{Input} & \textbf{Output} &                       \\[-0.3em]
+      \textbf{Instantiated Functions} & \textbf{Width} & \textbf{Width}  & \textbf{Invertibility}\\
+    \hline
+      $n$-bit Addition             & $n$ & $n$ & Complete \\
+      $n$-bit Less-than Comparison & $n$ & $1$ & Partial \\
+      Create $n$ Beaver Triples    & $n$ & $n$ & None \\
     \hline
   \end{tabular}
   \bigskip
   \caption{MPC frameworks and instantiated functions used in our evaluation. Each framework describes an approach for evaluating a binary circuit in MPC; we instantiate both frameworks with three different functions (represented as circuits) to construct secure protocols. }
-  \label{tbl:protocols}
-\end{table}
+  \label{fig:protocols}
+\end{figure}
 
 \paragraph{GMW (Goldreich-Micali-Widgerson).}
 The GMW protocol~\cite{goldreich2019play, goldreich2009foundations} is an MPC protocol for evaluating circuits. Each party holds \emph{additive secret shares} of each wire's value; to secret share a bit, a party selects a random bit to represent one share, and computes the other share by XORing the random bit with the secret bit.
@@ -1015,96 +1045,379 @@ The parties evaluate addition gates (and other linear operations) by adding the 
 The parties evaluate multiplication gates by using 1-out-of-4 oblivious transfer: the first party generates a random bit for its share of the output, and acts as the sender in OT; the second party acts as the receiver in OT and receives its share of the output. We implemented a compiler to generate \langname programs that evaluate Bristol fashion circuits using GMW.
 
 \paragraph{MPC with Beaver Triples.}
-Another MPC protocol for evaluating circuits also uses additive shares to hold wire values, but uses \emph{Beaver triples}~\cite{beaver1992efficient} to evaluate multiplication gates (instead of OT). A Beaver triple (or \emph{multiplication triple}) is a set of secret shares of numbers $a$, $b$, and $c$ such that $a \cdot b = c$. To use a Beaver triple, $P_1$ must have one share of each of $a$, $b$, and $c$, and $P_2$ must have the other share. Since the values are secret shared, they appear random to each party---but the correlation between the three numbers can be used to perform efficient multiplication between secret-shared numbers (described later). One Beaver triple must be consumed for each multiplication, but they can be generated in a separate offline phase.
+Another MPC protocol for evaluating circuits also uses additive shares to hold wire values,
+but uses \emph{Beaver triples}~\cite{beaver1992efficient} to evaluate multiplication gates (instead of OT).
+A Beaver triple (or \emph{multiplication triple}) is a set of secret shares of numbers $a$, $b$, and $c$ such that $a \cdot b = c$.
+To use a Beaver triple, $P_1$ must have one share of each of $a$, $b$, and $c$, and $P_2$ must have the other share.
+Since the values are secret shared, they appear random to each party---but
+the correlation between the three numbers can be used to perform efficient multiplication between secret-shared numbers.
+To evaluate a multiplication gate with a Beaver triple,
+the parties perform two multiplication-by-constant and broadcast operations, and derive one share each of the product.
 
-Given shares of a Beaver triple, the parties perform two multiplication-by-constant and broadcast operations, and derive one share each of the product. Our implementation of this approach employees a third-party ``dealer'' who generates the triples; a pre-processing (offline) phase can also be used to generate the triples. We implemented a similar compiler to generate \langname programs leveraging this approach for circuit specifications.
+One Beaver triple must be consumed for each multiplication.
+Our implementation of this framework employees a third-party "dealer" who generates the triples on-the-fly;
+a pre-processing (offline) phase would be used in real applications.
+We implemented a similar compiler to generate \langname programs leveraging this approach for circuit specifications.
 
 
 \paragraph{Functions evaluated.}
-We evaluate three functions, which we express as binary Bristol fashion circuits for two parties
-and compile to \langname programs using the approach described above.
+We evaluate three functions, which we express as binary Bristol fashion circuits~\cite{bristol_circuits_website} for two parties
+and compile to \langname programs using both of the approaches described above.
 All three functions expect input from both the honest and corrupt party.
+All three functions are parameterized by their size; their input- and/or output-bit-width is adjustable.
 The first, an $n$-bit addition circuit, is vacuously secure;
 its ideal functionality leaks all of the honest party's inputs
 because the corrupt party can subtract their inputs from the $n$-bit result to reconstruct the honest party's inputs.
-The second, an $n$-bit less-than comparison circuit, only leaks a single bit of information, which of the two inputs is larger.
-For $n=1$, the less-than protocol is also vacuously secure, but it leaks only partial information about the honest party's inputs for $n>1$.
+The second, an $n$-bit less-than comparison circuit,
+only reveals a single bit of information:
+which of the two inputs ($n$-bit binary numbers) is larger.
+For $n=1$, less-than implementations are also vacuously secure,
+but for $n>1$ only partial information about the honest party's inputs is revealed by the ideal functionality.
 The third, an $n$-bit Beaver triple generator, leaks no information about the honest party's input,
 since its output to each party is a single secret share of the Beaver triple.
 
 
-\begin{figure*}
-  \centering
-  \newcommand{\gsize}{.45\textwidth}
-\begin{tabular}{c| c c}
-    \hline\hline
-  & \textbf{OT-Based (GMW)} & \textbf{Beaver Triple-Based}\\
-    \hline\hline
-  \rotatebox{90}{\phantom{hellohello}$n$-bit addition}
-  & \includegraphics[width=\gsize]{graphs/security_adder_gmw_128_1024.pdf}
-                 & \includegraphics[width=\gsize]{graphs/security_adder_beaver_128_1024.pdf} \\
-    \hline
-  \rotatebox{90}{\phantom{hel}$n$-bit less-than comparison}
-  & \includegraphics[width=\gsize]{graphs/security_less_than_gmw_128_1024.pdf}
-                 & \includegraphics[width=\gsize]{graphs/security_less_than_beaver_128_1024.pdf} \\
-    \hline
-  \rotatebox{90}{\phantom{h}$n$-bit Beaver triple generation}
-  & \includegraphics[width=\gsize]{graphs/security_beaver_triple_gen_gmw_128_1024.pdf}
-                 & \includegraphics[width=\gsize]{graphs/security_beaver_triple_gen_beaver_128_1024.pdf} \\
-    \hline
-    \hline
-\end{tabular}
-\caption{Experimental results: ability to detect security bugs. We set the number of iterations to 128 and the training set size to 1024. Results for other settings appear in Appendix~\ref{sec:addit-exper-results}.}
-\label{fig:results_security}
-\end{figure*}
-
-
-
-\begin{figure*}
-  \centering
-  \newcommand{\gsize}{.45\textwidth}
-\begin{tabular}{c| c c}
-    \hline\hline
-  & \textbf{OT-Based (GMW)} & \textbf{Beaver Triple-Based}\\
-    \hline\hline
-  \rotatebox{90}{\phantom{hellohello}$n$-bit addition}
-  & \includegraphics[width=\gsize]{graphs/time_adder_gmw_256_2048.pdf}
-                 & \includegraphics[width=\gsize]{graphs/time_adder_beaver_256_2048.pdf} \\
-    \hline
-  \rotatebox{90}{\phantom{hel}$n$-bit less-than comparison}
-  & \includegraphics[width=\gsize]{graphs/time_less_than_gmw_256_2048.pdf}
-                 & \includegraphics[width=\gsize]{graphs/time_less_than_beaver_256_2048.pdf} \\
-    \hline
-  \rotatebox{90}{\phantom{h}$n$-bit Beaver triple generation}
-  & \includegraphics[width=\gsize]{graphs/time_beaver_triple_gen_gmw_256_2048.pdf}
-                 & \includegraphics[width=\gsize]{graphs/time_beaver_triple_gen_beaver_256_2048.pdf} \\
-    \hline
-    \hline
-\end{tabular}
-\caption{Experimental results: decision tree training time.}
-\label{fig:results_training_time}
-\end{figure*}
 
 \subsection{Experiment Setup}
 \label{sec:e2-experiment-setup}
 
 We run \toolname on the unmodified protocol in order to establish the protocol's security
 and show that \toolname doesn't flag secure protocols as insecure.
-Then we mutate the protocol in several ways to introduce security bugs and test \toolname's ability to detect these bugs. Specifically, our mutations are:
+Then we mutate the protocol in several ways to introduce security bugs and test \toolname's ability to detect these bugs.
+The effect of each mutation depends on the base protocol to which it's applied;
+Figure~\ref{fig:errors} outlines the implications of each mutation to each of the six secure protocols.
+Our mutations are:
 %
 \begin{itemize}
-\item \textbf{Biased sharing}: uses biased randomness to construct secret shares of honest party inputs.
-\item \textbf{Biased AND}: uses biased randomness as part of the evaluation of multiplication gates.
-\item \textbf{Accidental secret}: sometimes, at random, accidentally sends a secret held by the honest party  to the corrupt party.
-\item \textbf{Accidental gate}: sometimes, at random, accidentally sends an honest party's result from the evaluation of a multiplication gate to the corrupt party.
+\item \textbf{Biased sharing}: Uses biased randomness to construct secret shares of honest party inputs.
+    Specifically, the relevant \inlinecode{FLIP} is replaced by the \inlinecode{AND} of two \inlinecode{FLIP}s.
+\item \textbf{Biased AND}: Uses biased randomness (similar to Biased Sharing) as part of the evaluation of multiplication gates.
+\item \textbf{Accidental secret}: Sometimes, at random, "accidentally" sends a secret held by the honest party to the corrupt party.
+\item \textbf{Accidental gate}: Sometimes, at random, "accidentally" sends an honest party's share of the output wire
+    of a multiplication gate to the corrupt party.
 \end{itemize}
-%
-The severity of each mutation can be tuned by adjusting the bias in the related randomness. In the case of \textbf{accidental secret} and \textbf{accidental gate}, this affects the probability of accidentally revealing a value; in the others, it directly adjust the bias in the randomness.
+
+\begin{figure}
+  \centering
+  \renewcommand*{\arraystretch}{1.2}
+  \begin{tabular}{| r r | c : c : c : c|}
+    \hline
+      && \textbf{Biased}  & \textbf{Biased}       & \textbf{Accidental} & \textbf{Accidental} \\
+      && \textbf{Sharing} & \textbf{AND${}^\ast$} & \textbf{Secret}     & \textbf{Gate} \\
+    \hline
+      \multirow{3}{*}{\STAB{\rotatebox[origin=lB]{90}{\textbf{\quad GMW\vphantom{p} \quad}}}}
+      & \STAB{\rotatebox[origin=lB]{90}{\textbf{\quad Addition\vphantom{p} \quad}}}
+      & \multicolumn{4}{c|}{\begin{minipage}[t][][c]{0.6\textwidth}
+          % GMW ADDITION ALL CASES
+          \cellcolor{nullmutation}
+          Because addition is invertible, these are all \emph{vacuously secure}.
+        \end{minipage}}
+      \\
+      \cdashline{2-6}[0.4em/0.5em]
+      & \STAB{\rotatebox[origin=lB]{90}{\textbf{\quad Less Than${}^\dagger$\vphantom{p} \quad}}}
+      & \begin{minipage}[c][][c]{0.204\textwidth}
+          %GMW LESS THAN BIASED SHARING
+          \cellcolor{insecmutation}
+          Insecure
+        \end{minipage}
+      & \begin{minipage}[c][][c]{0.204\textwidth}
+          %GMW LESS THAN BIASED AND
+          \cellcolor{insecmutation}
+          Insecure
+        \end{minipage}
+      & \begin{minipage}[c][][c]{0.204\textwidth}
+          %GMW LESS THAN ACCIDENTIAL SECRET
+          \cellcolor{insecmutation}
+          Insecure
+        \end{minipage}
+      & \begin{minipage}[c][][c]{0.204\textwidth}
+          %GMW LESS THAN ACCIDENTIAL GATE
+          \cellcolor{insecmutation}
+          Insecure
+        \end{minipage}
+      \\
+      \cdashline{2-6}[0.4em/0.5em]
+      & \STAB{\rotatebox[origin=lB]{90}{\textbf{\quad Make Beaver Triples \quad}}}
+      & \begin{minipage}[c][][c]{0.204\textwidth}
+          % GMW MAKE BEAVER TRIPLES BIASED SHARING
+          \cellcolor{insecmutation}
+          Insecure
+        \end{minipage}
+      & \begin{minipage}[c][][c]{0.204\textwidth}
+          %GMW MAKE BEAVER TRIPLES BIASED AND
+          \cellcolor{nullmutation}
+          Secure.
+          Since the \texttt{AND} gates are exactly the output-wires of the circuits, leaking them doesn't reveal anything additional.
+        \end{minipage}
+      & \begin{minipage}[c][][c]{0.204\textwidth}
+          %GMW MAKE BEAVER TRIPLES ACCIDENTIAL SECRET
+          \cellcolor{insecmutation}
+          Insecure
+        \end{minipage}
+      & \begin{minipage}[c][][c]{0.204\textwidth}
+          %GMW MAKE BEAVER TRIPLES ACCIDENTIAL GATE
+          \cellcolor{nullmutation}
+          Secure.
+          Since the \texttt{AND} gates are exactly the output-wires of the circuits, leaking them doesn't reveal anything additional.
+        \end{minipage}
+      \\
+      \hdashline[0.5em/0.4em]
+      \multirow{3}{*}{\STAB{\rotatebox[origin=lB]{90}{\textbf{\quad MPC with Beaver Triples \quad}}}}
+      & \STAB{\rotatebox[origin=lB]{90}{\textbf{\quad Addition\vphantom{p} \quad}}}
+      & \multicolumn{4}{c|}{\begin{minipage}[t][][c]{0.6\textwidth}
+          % BEAVER ADDITION BANNER
+          \cellcolor{nullmutation}
+          Because addition is invertible, these are all \emph{vacuously secure}.
+        \end{minipage}}
+      \\
+      \cdashline{2-6}[0.4em/0.5em]
+      & \STAB{\rotatebox[origin=lB]{90}{\textbf{\quad Less Than${}^\dagger$\vphantom{p} \quad}}}
+      & \begin{minipage}[t][][c]{0.204\textwidth}
+          % BEAVER LESS THAN BIASED SHARING
+          \cellcolor{insecmutation}
+          Insecure
+        \end{minipage}
+      & \begin{minipage}[c][][c]{0.204\textwidth}
+          %BEAVER LESS THAN BIASED AND
+          \cellcolor{insecmutation}
+          Insecure.
+          The biased \inlinecode{FLIP}s happen within the dealer party;
+          the inverse-computation needed to leverage them is much deeper for this version of the mutation.
+        \end{minipage}
+      & \begin{minipage}[c][][c]{0.204\textwidth}
+          %BEAVER LESS THAN ACCIDENTIAL SECRET
+          \cellcolor{insecmutation}
+          Insecure
+        \end{minipage}
+      & \begin{minipage}[c][][c]{0.204\textwidth}
+          %BEAVER LESS THAN ACCIDENTIAL GATE
+          \cellcolor{insecmutation}
+          Insecure
+        \end{minipage}
+      \\
+      \cdashline{2-6}[0.4em/0.5em]
+      & \STAB{\rotatebox[origin=lB]{90}{\textbf{\quad Make Beaver Triples \quad}}}
+      & \begin{minipage}[c][][c]{0.204\textwidth}
+          %BEAVER MAKE BEAVER TRIPLES BIASED SHARING
+          \cellcolor{insecmutation}
+          Insecure
+        \end{minipage}
+      & \begin{minipage}[c][][c]{0.204\textwidth}
+          %BEAVER MAKE BEAVER TRIPLES BIASED AND
+          \cellcolor{insecmutation}
+          Insecure.
+          \inlinecode{C} has a good guess of the true shared triple.
+        \end{minipage}
+      & \begin{minipage}[c][][c]{0.204\textwidth}
+          %BEAVER MAKE BEAVER TRIPLES ACCIDENTIAL SECRET
+          \cellcolor{insecmutation}
+          Insecure
+        \end{minipage}
+      & \begin{minipage}[c][][c]{0.204\textwidth}
+          %BEAVER MAKE BEAVER TRIPLES ACCIDENTIAL GATE
+          \cellcolor{nullmutation}
+          Secure.
+          Since the \texttt{AND} gates are exactly the output-wires of the circuits, leaking them doesn't reveal anything additional.
+        \end{minipage}
+      \\
+    \hline
+  \end{tabular}
+  \caption{Expected results.
+  In eleven of the twenty four mutation cases (\highlight{nullmutation}{in gray}) the protocol will remain secure.\\
+  \footnotesize{$\ast$ \textbf{Biased AND} is implemented differently in the two frameworks.}\\
+  \footnotesize{$\dagger$ For $n=1$, the \textbf{Less Than} protocols are all \emph{vacuously secure}.}}
+  \label{fig:errors}
+\end{figure}
+
 
 \subsection{Results}
 \label{sec:e2_results}
 
-The results appear in Figures~\ref{fig:results_security} and~\ref{fig:results_training_time}. For the results in Figure~\ref{fig:results_security}, we set the number of iterations to 128 and the training set size to 1024. The results are similar for other settings; additional experimental results appear in Appendix~\ref{sec:addit-exper-results}.
+Each of the thirty combinations of framework, functionality, and mutation (including un-mutated)
+was instantiated with different values of $n$ from $1-32$ and tested with \toolname at four different power-settings in the low-to-medium range.
+(Each combination of \langname-file and \toolname-configuration was run three times to account for stochastic behavior.)
+Other than the $n=1$ cases, these variations within each combination mostly did not affect the outcomes of the tests.
+(They did affect runtime of the tests, which scaled linearly with the quantity of view-data generated/consumed.)
+In Figure~\ref{fig:observations} we summarize these outcomes.
+Figure~\ref{fig:observations-detail} shows detailed $p$-value and runtime data for the case of Beaver triple generation using the GMW framework.
+
+
+\begin{figure}
+  \centering
+  \renewcommand*{\arraystretch}{1.2}
+  \begin{tabular}{| r r | c : c : c : c|}
+    \hline
+      && \textbf{Biased} &  \textbf{Biased} & \textbf{Accidental} & \textbf{Accidental} \\
+      && \textbf{Sharing} & \textbf{AND} &    \textbf{Secret} &     \textbf{Gate} \\
+    \hline
+      \multirow{3}{*}{\STAB{\rotatebox[origin=lB]{90}{\textbf{\quad GMW\vphantom{p} \quad}}}}
+      & \STAB{\rotatebox[origin=lB]{90}{\textbf{\quad Addition\vphantom{p} \quad}}}
+      & \begin{minipage}[t][][c]{0.204\textwidth}
+          %GMW ADDITION BIASED SHARING
+          \cellcolor{incorrect}
+          \texttt{INSECURE}
+          (for $n>10$)
+        \end{minipage}
+      & \begin{minipage}[t][][c]{0.204\textwidth}
+          %GMW ADDITION BIASED AND
+          \cellcolor{incorrect}
+          \texttt{INSECURE}
+          (for $n>7$)
+        \end{minipage}
+      & \begin{minipage}[t][][c]{0.204\textwidth}
+          %GMW ADDITION ACCIDENTIAL SECRET
+          \cellcolor{incorrect}
+          \texttt{INSECURE}
+          (for $n>10$)
+        \end{minipage}
+      & \begin{minipage}[t][][c]{0.204\textwidth}
+          %GMW ADDITION ACCIDENTIAL GATE
+          \cellcolor{correct}
+          \texttt{MAYBE SECURE}
+        \end{minipage}
+      \\
+      \cdashline{2-6}[0.4em/0.5em]
+      & \STAB{\rotatebox[origin=lB]{90}{\textbf{\quad Less Than${}^\dagger$\vphantom{p} \quad}}}
+      & \begin{minipage}[t][][c]{0.204\textwidth}
+          %GMW LESS THAN BIASED SHARING
+          \cellcolor{correct}
+          \texttt{INSECURE}
+        \end{minipage}
+      & \begin{minipage}[t][][c]{0.204\textwidth}
+          %GMW LESS THAN BIASED AND
+          \cellcolor{correct}
+          \texttt{INSECURE}
+        \end{minipage}
+      & \begin{minipage}[t][][c]{0.204\textwidth}
+          %GMW LESS THAN ACCIDENTIAL SECRET
+          \cellcolor{correct}
+          \texttt{INSECURE}
+        \end{minipage}
+      & \begin{minipage}[t][][c]{0.204\textwidth}
+          %GMW LESS THAN ACCIDENTIAL GATE
+          \cellcolor{correct}
+          \texttt{INSECURE}
+        \end{minipage}
+      \\
+      \cdashline{2-6}[0.4em/0.5em]
+      & \STAB{\rotatebox[origin=lB]{90}{\textbf{\quad Make Beaver Triples \quad}}}
+      & \begin{minipage}[t][][c]{0.204\textwidth}
+          %GMW MAKE BEAVER TRIPLES BIASED SHARING
+          \cellcolor{correct}
+          \texttt{INSECURE}
+        \end{minipage}
+      & \begin{minipage}[t][][c]{0.204\textwidth}
+          %GMW MAKE BEAVER TRIPLES BIASED AND
+          \cellcolor{correct}
+          \texttt{MAYBE SECURE}
+        \end{minipage}
+      & \begin{minipage}[t][][c]{0.204\textwidth}
+          %GMW MAKE BEAVER TRIPLES ACCIDENTIAL SECRET
+          \cellcolor{correct}
+          \texttt{INSECURE}
+        \end{minipage}
+      & \begin{minipage}[t][][c]{0.204\textwidth}
+          %GMW MAKE BEAVER TRIPLES ACCIDENTIAL GATE
+          \cellcolor{correct}
+          \texttt{MAYBE SECURE}
+        \end{minipage}
+      \\
+      \hdashline[0.5em/0.4em]
+      \multirow{3}{*}{\STAB{\rotatebox[origin=lB]{90}{\textbf{\quad MPC with Beaver Triples \quad}}}}
+      & \STAB{\rotatebox[origin=lB]{90}{\textbf{\quad Addition\vphantom{p} \quad}}}
+      & \begin{minipage}[t][][c]{0.204\textwidth}
+          %BEAVER ADDITION BIASED SHARING
+          \cellcolor{incorrect}
+          \texttt{INSECURE}
+          (for $n>10$)
+        \end{minipage}
+      & \begin{minipage}[t][][c]{0.204\textwidth}
+          %BEAVER ADDITION BIASED AND
+          \cellcolor{correct}
+          \texttt{MAYBE SECURE}
+        \end{minipage}
+      & \begin{minipage}[t][][c]{0.204\textwidth}
+          %BEAVER ADDITION ACCIDENTIAL SECRET
+          \cellcolor{incorrect}
+          \texttt{INSECURE}
+          (for $n>7$)
+        \end{minipage}
+      & \begin{minipage}[t][][c]{0.204\textwidth}
+          %BEAVER ADDITION ACCIDENTIAL GATE
+          \cellcolor{correct}
+          \texttt{MAYBE SECURE}
+        \end{minipage}
+      \\
+      \cdashline{2-6}[0.4em/0.5em]
+      & \STAB{\rotatebox[origin=lB]{90}{\textbf{\quad Less Than${}^\dagger$\vphantom{p} \quad}}}
+      & \begin{minipage}[t][][c]{0.204\textwidth}
+          %BEAVER LESS THAN BIASED SHARING
+          \cellcolor{correct}
+          \texttt{INSECURE}
+        \end{minipage}
+      & \begin{minipage}[t][][c]{0.204\textwidth}
+          %BEAVER LESS THAN BIASED AND
+          \cellcolor{incorrect}
+          \texttt{MAYBE SECURE}
+        \end{minipage}
+      & \begin{minipage}[t][][c]{0.204\textwidth}
+          %BEAVER LESS THAN ACCIDENTIAL SECRET
+          \cellcolor{correct}
+          \texttt{INSECURE}
+        \end{minipage}
+      & \begin{minipage}[t][][c]{0.204\textwidth}
+          %BEAVER LESS THAN ACCIDENTIAL GATE
+          \cellcolor{incorrect}
+          \texttt{MAYBE SECURE}
+        \end{minipage}
+      \\
+      \cdashline{2-6}[0.4em/0.5em]
+      & \STAB{\rotatebox[origin=lB]{90}{\textbf{\quad Make Beaver Triples \quad}}}
+      & \begin{minipage}[t][][c]{0.204\textwidth}
+          %BEAVER MAKE BEAVER TRIPLES BIASED SHARING
+          \cellcolor{correct}
+          \texttt{INSECURE}
+        \end{minipage}
+      & \begin{minipage}[t][][c]{0.204\textwidth}
+          %BEAVER MAKE BEAVER TRIPLES BIASED AND
+          \cellcolor{correct}
+          \texttt{INSECURE}
+        \end{minipage}
+      & \begin{minipage}[t][][c]{0.204\textwidth}
+          %BEAVER MAKE BEAVER TRIPLES ACCIDENTIAL SECRET
+          \cellcolor{correct}
+          \texttt{INSECURE}
+        \end{minipage}
+      & \begin{minipage}[t][][c]{0.204\textwidth}
+          %BEAVER MAKE BEAVER TRIPLES ACCIDENTIAL GATE
+          \cellcolor{correct}
+          \texttt{MAYBE SECURE}
+        \end{minipage}
+      \\
+    \hline
+  \end{tabular}
+  \bigskip
+  \caption{Observed results.
+  Seventeen of the twenty four mutation cases are correctly flagged by \toolname (\highlight{correct}{in green});
+  in other cases (\highlight{incorrect}{in red}) an insecure protocol is not detected, or a vacuously secure protocol is flagged as \texttt{INSECURE}.\\
+  \footnotesize{$\dagger$ Since \textbf{Less Than} protocols are \emph{vacuously secure} at $n=1$, those cases are not represented here.}}
+  \label{fig:observations}
+\end{figure}
+
+\begin{figure*}
+  \centering
+  \newcommand{\gsize}{.45\textwidth}
+\begin{tabular}{c c}
+    \includegraphics[width=\gsize]{graphs/security_beaver_triple_gen_gmw_128_1024.pdf} &
+    \includegraphics[width=\gsize]{graphs/time_beaver_triple_gen_gmw_256_2048.pdf} \\
+    \textit{(a.)} & \textit{(b.)}
+\end{tabular}
+\caption{Experimental results from the .. case.}
+\label{fig:observations-detail}
+\end{figure*}
+
+
+
 
 \paragraph{Detecting security bugs.}
 \toolname is able to detect most security bugs in our evaluation, but interpreting its results requires care. \toolname detects \textbf{biased sharing} bugs in nearly all cases: the associated $p$-values are universally close to 0 in all six cases. The one exception is the $n$-bit adder for small $n$, where associated $p$ values are close to 1. This is likely due to the \emph{vacuous security} of the $n$-bit adder: for small bitwidths, the decision trees are able to reconstruct the honest party's inputs using only information from the ideal functionality, rendering \emph{any} protocol secure. For larger bitwidths, the decision trees are no longer able to perform this reconstruction, and the protocols are classified as insecure.
@@ -1269,12 +1582,66 @@ and usefully-powerful tests take just a few minutes.
 \label{sec:addit-exper-results}
 
 This Appendix contains additional experimental results excluded from the main body of the paper:
+The results appear in Figures~\ref{fig:results_security} and~\ref{fig:results_training_time}. For the results in Figure~\ref{fig:results_security}, we set the number of iterations to 128 and the training set size to 1024. The results are similar for other settings; additional experimental results appear in Appendix~\ref{sec:addit-exper-results}.
 %
 \begin{itemize}
 \item Figure~\ref{fig:extra1} presents additional results for $n$-bit addition.
 \item Figure~\ref{fig:extra2} presents additional results for $n$-bit less-than comparison.
 \item Figure~\ref{fig:extra3} presents additional results for $n$-bit Beaver triple generation.
 \end{itemize}
+
+
+\begin{figure*}
+  \centering
+  \newcommand{\gsize}{.45\textwidth}
+\begin{tabular}{c| c c}
+    \hline\hline
+  & \textbf{OT-Based (GMW)} & \textbf{Beaver Triple-Based}\\
+    \hline\hline
+  \rotatebox{90}{\phantom{hellohello}$n$-bit addition}
+  & \includegraphics[width=\gsize]{graphs/security_adder_gmw_128_1024.pdf}
+                 & \includegraphics[width=\gsize]{graphs/security_adder_beaver_128_1024.pdf} \\
+    \hline
+  \rotatebox{90}{\phantom{hel}$n$-bit less-than comparison}
+  & \includegraphics[width=\gsize]{graphs/security_less_than_gmw_128_1024.pdf}
+                 & \includegraphics[width=\gsize]{graphs/security_less_than_beaver_128_1024.pdf} \\
+    \hline
+  \rotatebox{90}{\phantom{h}$n$-bit Beaver triple generation}
+  & \includegraphics[width=\gsize]{graphs/security_beaver_triple_gen_gmw_128_1024.pdf}
+                 & \includegraphics[width=\gsize]{graphs/security_beaver_triple_gen_beaver_128_1024.pdf} \\
+    \hline
+    \hline
+\end{tabular}
+\caption{Experimental results: ability to detect security bugs. We set the number of iterations to 128 and the training set size to 1024. Results for other settings appear in Appendix~\ref{sec:addit-exper-results}.}
+\label{fig:results_security}
+\end{figure*}
+
+
+
+\begin{figure*}
+  \centering
+  \newcommand{\gsize}{.45\textwidth}
+\begin{tabular}{c| c c}
+    \hline\hline
+  & \textbf{OT-Based (GMW)} & \textbf{Beaver Triple-Based}\\
+    \hline\hline
+  \rotatebox{90}{\phantom{hellohello}$n$-bit addition}
+  & \includegraphics[width=\gsize]{graphs/time_adder_gmw_256_2048.pdf}
+                 & \includegraphics[width=\gsize]{graphs/time_adder_beaver_256_2048.pdf} \\
+    \hline
+  \rotatebox{90}{\phantom{hel}$n$-bit less-than comparison}
+  & \includegraphics[width=\gsize]{graphs/time_less_than_gmw_256_2048.pdf}
+                 & \includegraphics[width=\gsize]{graphs/time_less_than_beaver_256_2048.pdf} \\
+    \hline
+  \rotatebox{90}{\phantom{h}$n$-bit Beaver triple generation}
+  & \includegraphics[width=\gsize]{graphs/time_beaver_triple_gen_gmw_256_2048.pdf}
+                 & \includegraphics[width=\gsize]{graphs/time_beaver_triple_gen_beaver_256_2048.pdf} \\
+    \hline
+    \hline
+\end{tabular}
+\caption{Experimental results: decision tree training time.}
+\label{fig:results_training_time}
+\end{figure*}
 
 
 \input{full_figures.tex}

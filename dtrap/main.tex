@@ -1055,7 +1055,7 @@ To evaluate a multiplication gate with a Beaver triple,
 the parties perform two multiplication-by-constant and broadcast operations, and derive one share each of the product.
 
 One Beaver triple must be consumed for each multiplication.
-Our implementation of this framework employees a third-party "dealer" who generates the triples on-the-fly;
+Our implementation of this framework employs a third-party "dealer" who generates the triples on-the-fly;
 a pre-processing (offline) phase would be used in real applications.
 We implemented a similar compiler to generate \langname programs leveraging this approach for circuit specifications.
 
@@ -1240,7 +1240,7 @@ Other than the $n=1$ cases, these variations within each combination mostly did 
 (They did affect runtime of the tests, which scaled linearly with the quantity of view-data generated/consumed.)
 In Figure~\ref{fig:observations} we summarize these outcomes.
 Figure~\ref{fig:observations-detail} shows detailed $p$-value and runtime data for the case of Beaver triple generation using the GMW framework.
-
+More complete experimental results appear in Appendix~\ref{sec:addit-exper-results}.
 
 \begin{figure}
   \centering
@@ -1256,19 +1256,19 @@ Figure~\ref{fig:observations-detail} shows detailed $p$-value and runtime data f
           %GMW ADDITION BIASED SHARING
           \cellcolor{incorrect}
           \texttt{INSECURE}
-          (for $n>10$)
+          (for $n>10$)${}^\ddagger$
         \end{minipage}
       & \begin{minipage}[t][][c]{0.204\textwidth}
           %GMW ADDITION BIASED AND
           \cellcolor{incorrect}
           \texttt{INSECURE}
-          (for $n>7$)
+          (for $n>7$)${}^\ddagger$
         \end{minipage}
       & \begin{minipage}[t][][c]{0.204\textwidth}
           %GMW ADDITION ACCIDENTIAL SECRET
           \cellcolor{incorrect}
           \texttt{INSECURE}
-          (for $n>10$)
+          (for $n>10$)${}^\ddagger$
         \end{minipage}
       & \begin{minipage}[t][][c]{0.204\textwidth}
           %GMW ADDITION ACCIDENTIAL GATE
@@ -1329,7 +1329,7 @@ Figure~\ref{fig:observations-detail} shows detailed $p$-value and runtime data f
           %BEAVER ADDITION BIASED SHARING
           \cellcolor{incorrect}
           \texttt{INSECURE}
-          (for $n>10$)
+          (for $n>10$)${}^\ddagger$
         \end{minipage}
       & \begin{minipage}[t][][c]{0.204\textwidth}
           %BEAVER ADDITION BIASED AND
@@ -1340,7 +1340,7 @@ Figure~\ref{fig:observations-detail} shows detailed $p$-value and runtime data f
           %BEAVER ADDITION ACCIDENTIAL SECRET
           \cellcolor{incorrect}
           \texttt{INSECURE}
-          (for $n>7$)
+          (for $n>7$)${}^\ddagger$
         \end{minipage}
       & \begin{minipage}[t][][c]{0.204\textwidth}
           %BEAVER ADDITION ACCIDENTIAL GATE
@@ -1400,7 +1400,8 @@ Figure~\ref{fig:observations-detail} shows detailed $p$-value and runtime data f
   \caption{Observed results.
   Seventeen of the twenty four mutation cases are correctly flagged by \toolname (\highlight{correct}{in green});
   in other cases (\highlight{incorrect}{in red}) an insecure protocol is not detected, or a vacuously secure protocol is flagged as \texttt{INSECURE}.\\
-  \footnotesize{$\dagger$ Since \textbf{Less Than} protocols are \emph{vacuously secure} at $n=1$, those cases are not represented here.}}
+  \footnotesize{$\dagger$ Since \textbf{Less Than} protocols are \emph{vacuously secure} at $n=1$, those cases are not represented here.}\\
+  \footnotesize{$\ddagger$ See Figure~\ref{fig:interpretation}a2.}}
   \label{fig:observations}
 \end{figure}
 
@@ -1412,41 +1413,66 @@ Figure~\ref{fig:observations-detail} shows detailed $p$-value and runtime data f
     \includegraphics[width=\gsize]{graphs/time_beaver_triple_gen_gmw_256_2048.pdf} \\
     \textit{(a.)} & \textit{(b.)}
 \end{tabular}
-\caption{Experimental results from the .. case.}
+\caption{Experimental results from running \toolname against GMW implementations of Beaver triple generation.
+    \textit{(a.)} Keeping \texttt{iters=128}, \texttt{trainN=1024}, and \todo{testN=?}, we report the average of the returned $p$-values
+      for different mutation-settings and bit-widths, with error-bars as background shading;
+      $N=3$ for each data-point, so there is still some noise.
+    \textit{(b.)} We report the average runtime of \toolname with different power-settings against protocols of different bit-widths.
+      We report only the time taken by the \toolname test, not the time taken to \emph{generate} the data provided to it.
+      \todo{These are all the secure version, right?}}
 \label{fig:observations-detail}
 \end{figure*}
 
 
-
-
 \paragraph{Detecting security bugs.}
-\toolname is able to detect most security bugs in our evaluation, but interpreting its results requires care. \toolname detects \textbf{biased sharing} bugs in nearly all cases: the associated $p$-values are universally close to 0 in all six cases. The one exception is the $n$-bit adder for small $n$, where associated $p$ values are close to 1. This is likely due to the \emph{vacuous security} of the $n$-bit adder: for small bitwidths, the decision trees are able to reconstruct the honest party's inputs using only information from the ideal functionality, rendering \emph{any} protocol secure. For larger bitwidths, the decision trees are no longer able to perform this reconstruction, and the protocols are classified as insecure.
+\toolname is able to detect most, but not all, security bugs in our evaluation.
+Of the thirteen actually-insecure protocols (we ignore bit-width for the moment), eleven reliably received \texttt{INSECURE}.
+In these cases, the $p$-values were consistently negligible.
+In the Beaver triple based framework, some errors were not detected that ideally would have been.
+Due to the use of multiplication triples, taking advantage of the leakage from incorrectly-implemented \texttt{AND} gates
+in this framework is much more difficult than in the GMW case.
+These results suggest that \toolname will likely have difficulty detecting bugs that require deep ``backwards computation''
+to leverage the leaked information.
 
-\toolname detects \textbf{biased AND} bugs in most of the GMW-based protocols, but struggles to do so in the case of Beaver-triple-based protocols. Due to the use of multiplication triples, taking advantage of the leakage from biased AND gates in this case is much more difficult than in the GMW case. These results suggest that \toolname will likely have difficulty detecting bugs that require significant ``backwards computation'' to leverage the leaked information.
+In Figure~\ref{fig:interpretation} we noted a possible situation in which a secure protocol might be flagged \texttt{INSECURE},
+not by chance, but because information nominally inferable in the ideal world was not inferred by the ideal-world-trained D-Trees
+due to insufficient training data
+(and was inferred or better-inferred by the real-world trained D-Trees).
+As expected, this was only a problem with the vacuously secure Addition protocols
+that had been mutated in ways that \emph{"should have"} made them insecure.
+Vacuously secure protocols are of little interest in terms of MPC applications,
+and it's unclear if this kind of false-\texttt{INSECURE} report could happen
+to a real protocol that was correct to its authors intentions.
 
-\toolname detects \textbf{accidental secret} bugs in the same cases as biased sharing bugs, for the same reasons.
-
-\toolname detects \textbf{accidental gate} bugs in the $n$-bit-less-than comparison only in the OT-based framework.
-In the Beaver-triple framework, we hypothesize that the decision trees are not capable of the ``backwards computation''
-required to leverage the leaked information
-
-In other cases, the function's design means that AND gate outputs do not provide additional leakage beyond the ideal functionality,
-and therefore do not compromise security.
-\toolname ignores \textbf{biased AND} and \textbf{accidental gate} bugs in the case of $n$-bit Beaver triple generation
-because the result of each AND gate is also one of the protocol's outputs---so a bug which reveals it does not leak any new information.
-\toolname detects \textbf{accidental gate} bugs for the $n$-bit Beaver triple generation function when the Beaver-triple-based protocol is used, because biasing the randomness for AND gates reveals information about the Beaver triples themselves, from which it is possible to deduce the honest party's shares of the inputs.
+For protocols reported as \texttt{INSECURE}, the $p$-values were usually negligible.
+Intermediate behavior, where the $p$-values are biased-low but not consistently below reasonable $\alpha$ thresholds,
+requires improbable alignment of the difficulty of detecting the bug and the power-configuration of \toolname.
+For protocols reported as \texttt{MAYBE SECURE}, the $p$-values tend to be \emph{either} uniformly distributed
+\emph{or} consistently approximately-equal-to one.
 
 
 \paragraph{Scalability.}
-The primary computational cost of \toolname is the time taken to train the decision trees. We record the total training time for each combination of MPC framework and function, and plot the results for several settings in Figure~\ref{fig:results_training_time}. For the settings we evaluated, training time grows linearly with the number of iterations, the training data size, and the bitwidth of the target function (\ie the size of the circuit being tested). Even for the largest bitwidths we considered, training takes only seconds to minutes.
+The primary computational cost of \toolname is the time taken to train the decision trees.
+For the settings we evaluated, training time grows linearly with the number of iterations,
+the training data size, and the bitwidth of the target function (\ie the size of the circuit being tested).
+Even for the largest bitwidths and row-counts we considered, training takes only minutes.
+
 
 \subsection{Discussion}
 
-The results of these experiments suggest that \toolname scales linearly with protocol size and test power, and is capable of detecting bugs in both randomly-generated and real-world protocols. The test typically runs in just seconds to minutes. The results of our experiment on protocol mutations show that \toolname is effective for detecting important classes of security bugs, but that care must be taken in interpreting the results.
+The results of these experiments suggest that \toolname scales linearly with protocol size and test power,
+and is capable of detecting bugs in both randomly-generated and real-world protocols.
+The test typically runs in just seconds to minutes.
+The results of our experiment on protocol mutations show that \toolname is effective for detecting important classes of security bugs,
+but that care must be taken in interpreting the results.
 
-For security bugs that directly reveal sensitive information (\eg \textbf{biased sharing} bugs) \toolname is particularly effective. Our results suggest that \toolname is capable of detecting these accidental disclosures even at low test powers and in the context of large protocols.
- 
-\toolname is less effective for security bugs that require significant ``backwards computation'' to leverage the leaked information (\eg \textbf{accidental gate} bugs), since decision trees are not well-suited to solving this problem. A more sophisticated model---such as a deep neural network---may be able to perform this kind of computation, but would take significantly longer to train.
+For security bugs that directly reveal sensitive information (\eg \textbf{biased sharing} bugs) \toolname is particularly effective.
+Our results suggest that \toolname is capable of detecting these accidental disclosures even at low test powers and in the context of large protocols.
+
+\toolname is less effective for security bugs that require significant ``backwards computation'' to leverage the leaked information
+(\eg \textbf{accidental gate} bugs), since decision trees are not well-suited to solving this problem.
+We leave open the possibility that more sophisticated models---such as a deep neural networks---might
+be able to perform this kind of inference, but they would take significantly longer to train.
 
 
 
@@ -1583,6 +1609,7 @@ and usefully-powerful tests take just a few minutes.
 
 This Appendix contains additional experimental results excluded from the main body of the paper:
 The results appear in Figures~\ref{fig:results_security} and~\ref{fig:results_training_time}. For the results in Figure~\ref{fig:results_security}, we set the number of iterations to 128 and the training set size to 1024. The results are similar for other settings; additional experimental results appear in Appendix~\ref{sec:addit-exper-results}.
+We record the total training time for each combination of MPC framework and function, and plot the results for several settings in Figure~\ref{fig:results_training_time}. 
 %
 \begin{itemize}
 \item Figure~\ref{fig:extra1} presents additional results for $n$-bit addition.

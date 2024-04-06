@@ -227,7 +227,6 @@
 \todo{ACM subjects and keywords.}\\
 \todo{check consistency of formatting of variable names etc}\\
 \todo{add "Description" tags to all tables.}\\
-\todo{We’ll discuss the realism of the bugs in our experiments.}\\
 \todo{provide/check the test settings and other context of reported data.}\\
 \todo{rewrite appendix A to make enough sense.}\\
 \todo{rewrite appendis B to make sense, cover whatever we say it covers, and look nice.}\\
@@ -986,8 +985,11 @@ We implement two MPC frameworks for evaluating circuits,
 instantiate them with three different functionality-circuits to obtain concrete protocols,
 systematically introduce bugs into these protocols,
 and evaluate \toolname's ability to detect the bugs.
+\toolname is not intended to replace more formal proofs of security,
+but rather as a \emph{"sanity check"} before investing effort in such a proof and/or after implementing actual software.
+Therefore, the bugs we introduce in these experiments are intended to represent (the statistical effects of) oversights a protocol author might make.
 We summarize the implemented protocols in Section~\ref{sec:protocols-evaluated},
-describe the experiment in Section~\ref{sec:e2-experiment-setup},
+describe the experiment and protocol-mutations in Section~\ref{sec:e2-experiment-setup},
 and present the results in Section~\ref{sec:e2_results}.
 
 \subsection{Protocols Evaluated}

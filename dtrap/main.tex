@@ -293,7 +293,7 @@ but techniques have been found to improve performance somewhat.
 The traditional expression of MPC assumes a pre-determined function $F$, the \emph{functionality},
 mapping the tuple of all participants' input vectors to the respective tuple of output vectors
 (or to distributions of outputs, if $F$ is non-deterministic).
-For example, Protocol~\ref{fig:example-vac-secure} implements the following function:
+For example, Protocol~\ref{fig:example-vac-secure} implements the following function:\todo{The angle-bracket notation and variable names are a bit confusing, maybe consider using $F(x,y) = (x \not= y, x \not= y)$ instead and having one sentence to say the function outputs $x\not=y$ for both parties; if the angle-bracket notation is important then you probably should say what it means here (and otherwise eliminate it).}
 $$F_3\bigpar{\vertvec{\mathtt{sec}}, \vertvec{\mathtt{pub}}}
   := \bigpar{\vertvec{\mathtt{sec} \neq \mathtt{pub}}, \vertvec{\mathtt{sec} \neq \mathtt{pub}}}$$
 In an \termOfArt{ideal world}, a trusted third party (the \termOfArt{ideal functionality}) would accept input messages

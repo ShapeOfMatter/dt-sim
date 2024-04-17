@@ -293,18 +293,26 @@ but techniques have been found to improve performance somewhat.
 The traditional expression of MPC assumes a pre-determined function $F$, the \emph{functionality},
 mapping the tuple of all participants' input vectors to the respective tuple of output vectors
 (or to distributions of outputs, if $F$ is non-deterministic).
-For example, Protocol~\ref{fig:example-vac-secure} implements the following function:\todo{The angle-bracket notation and variable names are a bit confusing, maybe consider using $F(x,y) = (x \not= y, x \not= y)$ instead and having one sentence to say the function outputs $x\not=y$ for both parties; if the angle-bracket notation is important then you probably should say what it means here (and otherwise eliminate it).}
-$$F_3\bigpar{\vertvec{\mathtt{sec}}, \vertvec{\mathtt{pub}}}
-  := \bigpar{\vertvec{\mathtt{sec} \neq \mathtt{pub}}, \vertvec{\mathtt{sec} \neq \mathtt{pub}}}$$
+For example, Protocol~\ref{fig:example-vac-secure} implements the following function:
+$$F_3\bigpar{\mathtt{sec}, \mathtt{pub}}
+  := \mathtt{sec} \neq \mathtt{pub}$$
+For full formality, $F_3$ would be written as a function from two vectors to two vectors, because there are two parties involved.
+\inlinecode{H} provides one input vector containing just \inlinecode{sec},
+and \inlinecode{C} provides the other input vector containing just \inlinecode{pub}.
+In this example the two parties' output vectors would be the same, containing just the value of \inlinecode{x}.
+
 In an \termOfArt{ideal world}, a trusted third party (the \termOfArt{ideal functionality}) would accept input messages
 from all other parties, compute $F$, and then send the parties their respective outputs.
-The ideal functionality implemented by Protocol~\ref{fig:example-insecure}
+The ideal functionality $F_1$ implemented by Protocol~\ref{fig:example-insecure}
 could be reasonably implemented by just declaring a coin from someone's pocket to be the \textit{"trusted third party"},
 and ascribing \inlinecode{true} and \inlinecode{false} to heads and tails.
 A \termOfArt{real world} protocol $Π$ is said to \emph{correctly} implement $F$ if, for all possible inputs,
-$Π$ results in all parties getting the same outputs as they would have in the ideal world.
+$Π$ results in all parties getting the same outputs as they would have in the ideal
+world\footnote{In the case of a nondeterministic functionality like $F_1$, the parties get outputs sampled from the correct distribution.}.
+
 The \emph{security} of $Π$ is expressed in terms of a particular threat model and the participants' \textit{"views"}.
-The \termOfArt{ideal world view}, $\mathsf{Ideal}_P(F,\vec{x})$, of a party $P$ is what it sees when running $F$ in the ideal world:
+For a given functionality $F$, list of parties' inputs $\vec{x}$, and list of parties' outputs $\vec{y}=F(\vec{x})$,
+the \termOfArt{ideal world view}, $\mathsf{Ideal}_P(F,\vec{x})$, of a party $P$ is what it sees when running $F$ in the ideal world:
 just its inputs $\vec{x}_P$ and its outputs $\vec{y}_P$.
 For example, \inlinecode{C}'s ideal world view of an execution of Protocol~\ref{fig:example-vac-protocol}
 would be a single random bit, the value of \inlinecode{x} in that execution.

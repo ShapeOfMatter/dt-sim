@@ -330,6 +330,8 @@ Both kinds of views extend naturally to lists of parties.
     It's ideal functionality is \textit{"flip a coin"},
     because the one-bit output is uniformly distributed regardless of anyone's \inlinecode{SECRET}s.}
   \label{fig:example-insecure}
+  \Description[.CHO code for a protocol for two parties, yielding random output.]
+              {Eight lines of .CHO code. Two parties participate; they both get a random value "x" at the end, but the secret value "sec" is leaked.}
 \end{figure}
 \begin{figure}[tbhp]
   \begin{mdframed}
@@ -339,6 +341,8 @@ Both kinds of views extend naturally to lists of parties.
   \caption{An example protocol, Protocol~\ref{fig:example-vac-protocol}, written in \langname.
     This protocol \emph{does} demonstrate MPC security, although it's ideal functionality is just \textit{"flip a coin"}.}
   \label{fig:example-vac-protocol}
+  \Description[.CHO code for a protocol for two parties, yielding random output.]
+              {Eight lines of .CHO code. Two parties participate; they both get a random value "x" at the end, after some extra shenanigans.}
 \end{figure}
 \begin{figure}[tbhp]
   \begin{mdframed}
@@ -350,6 +354,8 @@ Both kinds of views extend naturally to lists of parties.
     although such security is vacuous because \inlinecode{C} could compute \inlinecode{H}'s \inlinecode{SECRET}
     from the ideal functionality: \textit{"return the xor of the secret and public values"}.}
   \label{fig:example-vac-secure}
+  \Description[.CHO code for a protocol for two parties, yielding the "XOR" of two inputs.]
+              {Eight lines of .CHO code. Two parties participate; they're each able to learn the other's input.}
 \end{figure}
 
 
@@ -628,6 +634,9 @@ an \texttt{INSECURE} result from \toolname is strong evidence that the program d
     For each of these examples we include here a view row for each possible execution trace;
     \toolname assumes that the data it ingests is randomly sampled.}
   \label{fig:views}
+  \Description[Three formatted CSV tables, in which each row corresponds to a possible trace through the respective program.]
+              {Three formatted CSV tables. Each row represents an execution trace. The honest secrets are in red.
+               Data that's in the ideal world views is in green; additional data that's in the real world views is in grey.}
 \end{figure}
 
 To test a protocol, \toolname uses pairs of D-Trees to predict the honest secrets based on the corrupt views.
@@ -713,6 +722,7 @@ because keeping track of the layered polarities of the situation is a source of 
   \end{tabular}
   \caption{Interpretations of test results that should be considered after running \toolname.}
   \label{fig:interpretation}
+  \Description{Four quadrants, for when DT-SIM correctly or incorrectly says "INSECURE" or "MAYBE SECURE".}
 \end{figure}
 
 The usual trade-offs of significance testing apply.
@@ -848,6 +858,7 @@ party | var | func  :=  regex("[a-zA-Z_][a-z0-9_]*")
       Aliases (\eg \texttt{true} meaning \texttt{1})
       are omitted.}
   \label{fig:cho-bnf}
+  \Description{A semi-formal BNF syntax for the .CHO language.}
 \end{figure}
 
 \begin{figure}[tbhp]
@@ -877,6 +888,7 @@ OUTPUT h_out2
   %\newcommand{\gsize}{.38\textwidth}
   \caption{An example \langname program.}
   \label{fig:example-cho}
+  \Description{A 19-line .CHO program; it doesn't do much but it shows how the language is used.}
 \end{figure}
 
 \section{Evaluation: Bug-Finding in Generated Protocols}
@@ -928,6 +940,10 @@ and ran \toolname against each of them with a grid of different parameters.
     For all tests, \texttt{iters=100} and \texttt{testN$\approx\!\!\frac{\mathtt{trainN}}{4}$}.
     }
   \label{fig:sankey}
+  \Description[A Sankey plot showing how DT-SIM assesed 500 protocols at varying power settings.]
+              {A Sankey plot showing how DT-SIM assesed 500 protocols.
+              As the test power was increased, more and more of the protocols were flagged insecure,
+              until at "trainN=4813" the last protocol was flagged "INSECURE" at "alpha=0.000125".}
 \end{figure*}
 
 \begin{figure}[tbhp]
@@ -938,6 +954,9 @@ and ran \toolname against each of them with a grid of different parameters.
            the number of programs tested diminishes for higher \texttt{trainN} values.
            }
   \label{fig:linear-time}
+  \Description[A simple line chart showing runtime as a function of test power.]
+              {A simple line chart showing runtime as a function of test power.
+              The relationship is clearly linear, and variation within any given power is low.}
 \end{figure}
 
 
@@ -958,6 +977,11 @@ and ran \toolname against each of them with a grid of different parameters.
     \textbf{(b)} The mean rumtime of \toolname in this experiment, in seconds.
     The isolines are consistent with the expectation that runtime is driven linearly by the total amount of data used.}
 \label{fig:cube-search}
+  \Description[3D heat-maps showing the affects of the three individual test-power settings on performance.]
+              {3D heat-maps showing the affects of the three individual test-power settings on performance.
+              One heat-map shows how the settings affect DT-SIM's ability to detect insecure programs.
+              The other shows how the settings affect the runtime of DT-SIM.
+              Both are show twice so the viewer can see the front and back of the cubes.}
 \end{figure*}
 
 \subsection{Results}
@@ -1035,6 +1059,7 @@ with the addition of a third "dealer" party to produce correlated randomness in 
   \bigskip
   \caption{MPC frameworks and instantiated functions used in our evaluation. Each framework describes an approach for evaluating a binary circuit in MPC; we instantiate both frameworks with three different functions (represented as circuits) to construct secure protocols. }
   \label{fig:protocols}
+  \Description{Two small tables describing the frameworks and functionalities used in this experiment.}
 \end{figure}
 
 \paragraph{GMW (Goldreich-Micali-Widgerson).}
@@ -1228,6 +1253,8 @@ Our mutations are:
   \footnotesize{$\ast$ \textbf{Biased AND} is implemented differently in the two frameworks.}\\
   \footnotesize{$\dagger$ For $n=1$, the \textbf{Less Than} protocols are all \emph{vacuously secure}.}}
   \label{fig:errors}
+  \Description{A table of the different combinations of framework, functionality, and mutation,
+               to easily show how each mutation affects the true security of the protocols.}
 \end{figure}
 
 
@@ -1404,6 +1431,7 @@ More complete experimental results appear in Appendix~\ref{sec:addit-exper-resul
   \footnotesize{$\dagger$ Since \textbf{Less Than} protocols are \emph{vacuously secure} at $n=1$, those cases are not represented here.}\\
   \footnotesize{$\ddagger$ See Figure~\ref{fig:interpretation}a2.}}
   \label{fig:observations}
+  \Description{A table with the same twenty-four cells as the previous table, showing what DT-SIM reported in that case.}
 \end{figure}
 
 \begin{figure*}
@@ -1422,6 +1450,7 @@ More complete experimental results appear in Appendix~\ref{sec:addit-exper-resul
       We report only the time taken by the \toolname test, not the time taken to \emph{generate} the data provided to it.
       \todo{These are all the secure version, right?}}
 \label{fig:observations-detail}
+  \Description{Two line-graphs, showing the p-values and runtimes from DT-SIM during one of the bit-width-series in this experiment.}
 \end{figure*}
 
 
@@ -1642,6 +1671,8 @@ We record the total training time for each combination of MPC framework and func
 \end{tabular}
 \caption{Experimental results: ability to detect security bugs. We set the number of iterations to 128 and the training set size to 1024. Results for other settings appear in Appendix~\ref{sec:addit-exper-results}.}
 \label{fig:results_security}
+  \Description[short]
+              {long}
 \end{figure*}
 
 
@@ -1669,6 +1700,8 @@ We record the total training time for each combination of MPC framework and func
 \end{tabular}
 \caption{Experimental results: decision tree training time.}
 \label{fig:results_training_time}
+  \Description[short]
+              {long}
 \end{figure*}
 
 

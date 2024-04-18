@@ -322,7 +322,7 @@ Both kinds of views extend naturally to lists of parties.
   %\newcommand{\gsize}{.38\textwidth}
     \caption{An example protocol, Protocol~\ref{fig:example-insecure}, written in \langname.
     This protocol does \emph{not} demonstrate MPC security.
-    It's ideal functionality is \textit{"flip a coin"},
+    Its ideal functionality is \textit{"flip a coin"},
     because the one-bit output is uniformly distributed regardless of anyone's \inlinecode{SECRET}s.}
   \label{fig:example-insecure}
   \Description[.CHO code for a protocol for two parties, yielding random output.]
@@ -334,7 +334,7 @@ Both kinds of views extend naturally to lists of parties.
   \end{mdframed}
   %\newcommand{\gsize}{.38\textwidth}
   \caption{An example protocol, Protocol~\ref{fig:example-vac-protocol}, written in \langname.
-    This protocol \emph{does} demonstrate MPC security, although it's ideal functionality is just \textit{"flip a coin"}.}
+    This protocol \emph{does} demonstrate MPC security, although its ideal functionality is just \textit{"flip a coin"}.}
   \label{fig:example-vac-protocol}
   \Description[.CHO code for a protocol for two parties, yielding random output.]
               {Eight lines of .CHO code. Two parties participate; they both get a random value "x" at the end, after some extra shenanigans.}
@@ -394,7 +394,7 @@ Definition~\ref{def:passive-mpc} is tight, in the sense that relaxing it in any 
 allow a "secure" protocol to do something bad, or require introducing restrictions
 on the kinds of functionality to which the definition could be applied\footnote{
     The idea that a secure protocol \emph{can't} do anything bad assumes that computing the functionality is good to begin with.
-    MPC is not a solution for situations where that's not case.
+    MPC is not a solution for situations where that's not the case.
 }.
 That said, some simplification is possible for our purposes:
 Since the (passive) corrupted parties are assumed to follow $Π$ faithfully, we are fine to limit ourselves to
@@ -426,7 +426,7 @@ all else that needs to be said about it is that
 any protocol which is not \termOfArt{passive secure} is automatically not \termOfArt{active secure}.
 
 \paragraph{Vacuousness.}
-Certain edge cases are helpful to consider, as they map out the edges of the problem of testing from MPC security.
+Certain edge cases are helpful to consider, as they map out the edges of the problem of testing for MPC security.
 In the first case, $Π$ itself may be vacuous.
 A \termOfArt{vacuous protocol}\footnote{
     This terminology is new; we needed it to talk though problems we encountered in during this project.

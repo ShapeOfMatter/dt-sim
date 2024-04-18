@@ -184,39 +184,38 @@
 %%
 \begin{CCSXML}
 <ccs2012>
- <concept>
-  <concept_id>00000000.0000000.0000000</concept_id>
-  <concept_desc>Do Not Use This Code, Generate the Correct Terms for Your Paper</concept_desc>
-  <concept_significance>500</concept_significance>
- </concept>
- <concept>
-  <concept_id>00000000.00000000.00000000</concept_id>
-  <concept_desc>Do Not Use This Code, Generate the Correct Terms for Your Paper</concept_desc>
-  <concept_significance>300</concept_significance>
- </concept>
- <concept>
-  <concept_id>00000000.00000000.00000000</concept_id>
-  <concept_desc>Do Not Use This Code, Generate the Correct Terms for Your Paper</concept_desc>
-  <concept_significance>100</concept_significance>
- </concept>
- <concept>
-  <concept_id>00000000.00000000.00000000</concept_id>
-  <concept_desc>Do Not Use This Code, Generate the Correct Terms for Your Paper</concept_desc>
-  <concept_significance>100</concept_significance>
- </concept>
-</ccs2012>
+   <concept>
+       <concept_id>10002978.10002986.10002990</concept_id>
+       <concept_desc>Security and privacy~Logic and verification</concept_desc>
+       <concept_significance>500</concept_significance>
+       </concept>
+   <concept>
+       <concept_id>10002978.10003006.10011608</concept_id>
+       <concept_desc>Security and privacy~Information flow control</concept_desc>
+       <concept_significance>300</concept_significance>
+       </concept>
+   <concept>
+       <concept_id>10002950.10003648.10003662</concept_id>
+       <concept_desc>Mathematics of computing~Probabilistic inference problems</concept_desc>
+       <concept_significance>300</concept_significance>
+       </concept>
+ </ccs2012>
 \end{CCSXML}
 
-\ccsdesc[500]{Do Not Use This Code~Generate the Correct Terms for Your Paper}
-\ccsdesc[300]{Do Not Use This Code~Generate the Correct Terms for Your Paper}
-\ccsdesc{Do Not Use This Code~Generate the Correct Terms for Your Paper}
-\ccsdesc[100]{Do Not Use This Code~Generate the Correct Terms for Your Paper}
+\ccsdesc[500]{Security and privacy~Logic and verification}
+\ccsdesc[300]{Security and privacy~Information flow control}
+\ccsdesc[300]{Mathematics of computing~Probabilistic inference problems}
 
 %%
 %% Keywords. The author(s) should pick words that accurately describe
 %% the work being presented. Separate the keywords with commas.
-\keywords{Do, Not, Us, This, Code, Put, the, Correct, Terms, for,
-  Your, Paper}
+\keywords{secure multiparty computation,
+          property-based testing,
+          hyperproperty testing,
+          probabilistic programming,
+          distributed programming,
+          choreographic programming,
+          conditional independence}
 
 \received{20 February 2007}
 \received[revised]{12 March 2009}
@@ -224,7 +223,6 @@
 
 \maketitle
 
-\todo{ACM subjects and keywords.}\\
 
 
 
@@ -1440,15 +1438,16 @@ More complete experimental results appear in Appendix~\ref{sec:addit-exper-resul
     \textit{(a.)} & \textit{(b.)}
 \end{tabular}
 \caption{Experimental results from running \toolname against GMW implementations of Beaver triple generation.
-    \textit{(a.)} Keeping \texttt{iters=128}, \texttt{trainN=1024}, and \todo{testN=?}, we report the average of the returned $p$-values
+    \textit{(a.)} Keeping \texttt{iters=128}, \texttt{trainN=1024}, and \texttt{testN=512}, we report the average of the returned $p$-values
       for different mutation-settings and bit-widths, with error-bars as background shading;
       $N=3$ for each data-point, so there is still some noise.
     \textit{(b.)} We report the average runtime of \toolname with different power-settings against protocols of different bit-widths.
       We report only the time taken by the \toolname test, not the time taken to \emph{generate} the data provided to it.
-      \todo{These are all the secure version, right?}}
+      In \textit{(b.)} only the un-mutated version is analyzed, and \texttt{testN=trainN/2}}.
 \label{fig:observations-detail}
   \Description{Two line-graphs, showing the p-values and runtimes from DT-SIM during one of the bit-width-series in this experiment.}
 \end{figure*}
+%sourced from choreography/graphs/Adder Circuit Results.ipynb
 
 
 \paragraph{Detecting security bugs.}

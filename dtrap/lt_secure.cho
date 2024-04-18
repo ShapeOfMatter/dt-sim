@@ -1,0 +1,47 @@
+MACRO secret_share(P1(x), P2()) AS
+  s1 = FLIP @P1
+  s2 = x + s1
+  SEND s2 TO P2
+ENDMACRO
+MACRO and_gmw(P1(x2, y2), P2(x1, y1)) AS
+  out2 = FLIP @P2
+  g1_s2_00 = out2 + ((x1 + 0) ^ (y1 + 0))
+  g1_s2_01 = out2 + ((x1 + 0) ^ (y1 + 1))
+  g1_s2_10 = out2 + ((x1 + 1) ^ (y1 + 0))
+  g1_s2_11 = out2 + ((x1 + 1) ^ (y1 + 1))
+  out1 = OBLIVIOUSLY [[g1_s2_00, g1_s2_01]?y2, [g1_s2_10, g1_s2_11]?y2]?x2 FOR P1
+ENDMACRO
+MACRO reveal(P1(x1), P2(x2)) AS
+  SEND x1 TO P2
+  SEND x2 TO P1
+  y = x1 + x2
+ENDMACRO
+x0 = SECRET @P1
+x1 = SECRET @P1
+y2 = SECRET @P2
+y3 = SECRET @P2
+DO secret_share(P1(x0), P2()) GET(x0_1=s1, x0_2=s2)
+DO secret_share(P1(x1), P2()) GET(x1_1=s1, x1_2=s2)
+DO secret_share(P2(y2), P1()) GET(y2_1=s2, y2_2=s1)
+DO secret_share(P2(y3), P1()) GET(y3_1=s2, y3_2=s1)
+-- Circuit evaluation
+g3_1 = ~y2_1
+g3_2 = y2_2
+DO and_gmw(P1(x0_1, g3_1), P2(x0_2, g3_2)) GET(g4_1=out1, g4_2=out2)
+g5_1 = ~x0_1
+g5_2 = x0_2
+DO and_gmw(P1(y2_1, g5_1), P2(y2_2, g5_2)) GET(g6_1=out1, g6_2=out2)
+g7_1 = ~y3_1
+g7_2 = y3_2
+g8_1 = ~g6_1
+g8_2 = g6_2
+DO and_gmw(P1(g7_1, g8_1), P2(g7_2, g8_2)) GET(g9_1=out1, g9_2=out2)
+DO and_gmw(P1(x1_1, g9_1), P2(x1_2, g9_2)) GET(g10_1=out1, g10_2=out2)
+DO and_gmw(P1(g4_1, g10_1), P2(g4_2, g10_2)) GET(g11_1=out1, g11_2=out2)
+g12_1 = g4_1 + g10_1
+g12_2 = g4_2 + g10_2
+g13_1 = g11_1 + g12_1
+g13_2 = g11_2 + g12_2
+-- Reveal output
+DO reveal(P1(g13_1), P2(g13_2)) GET(r0=y)
+OUTPUT r0
